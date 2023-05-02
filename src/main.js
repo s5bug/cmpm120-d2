@@ -1,3 +1,7 @@
+import 'phaser';
+
+import AdventureScene from './adventure.js';
+
 class Demo1 extends AdventureScene {
     constructor() {
         super("demo1", "First Room");

@@ -1,4 +1,6 @@
-class AdventureScene extends Phaser.Scene {
+import 'phaser';
+
+export default class AdventureScene extends Phaser.Scene {
 
     init(data) {
         this.inventory = data.inventory || [];
