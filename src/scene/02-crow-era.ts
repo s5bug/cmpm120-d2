@@ -37,9 +37,11 @@ export default class CrowEra extends AdventureScene {
         this.guy = new ItemSprite(
             this,
             'guy',
-            ((this.w * 0.75) / 2) - (this.soccerBall.itemImg.width * 2),
+            0,
             this.h * 3 / 4
         )
+        this.guy.x =
+            ((this.w * 0.75) / 2) - (this.soccerBall.itemImg.width + this.guy.itemImg.width)
         this.add.existing(this.guy)
 
         this.riverOfTime = new ItemSprite(

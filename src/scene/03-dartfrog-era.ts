@@ -36,9 +36,11 @@ export default class DartfrogEra extends AdventureScene {
         this.fishgirl = new ItemSprite(
             this,
             'fishgirl',
-            ((this.w * 0.75) / 2) - (2 * this.guy.itemImg.width),
+            0,
             this.h * 3 / 4
         )
+        this.fishgirl.x =
+            ((this.w * 0.75) / 2) - (this.fishgirl.itemImg.width + this.guy.itemImg.width)
         this.add.existing(this.fishgirl)
 
         this.docks = new ItemSprite(
