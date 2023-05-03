@@ -1,14 +1,8 @@
 import 'phaser';
 
 export default (scene: Phaser.Scene, cb: () => void) => {
-    let debugCombo =
-        scene.input.keyboard?.createCombo(
-            'WHATSLIGMA',
-            {}
-        )
-
-    scene.input.keyboard?.on('keycombomatch', (kb: Phaser.Input.Keyboard.KeyCombo, _: KeyboardEvent) => {
-        if(kb == debugCombo) {
+    scene.input.keyboard?.on('keydown', (ev: KeyboardEvent) => {
+        if(new URL(window.location.href).searchParams.get("debug") == "true" && ev.key == "x") {
             cb()
         }
     })
