@@ -1,6 +1,6 @@
 import 'phaser';
 
-import AdventureScene from './adventure.js';
+import AdventureScene from './adventure.ts';
 
 class Demo1 extends AdventureScene {
     constructor() {
@@ -133,3 +133,8 @@ const game = new Phaser.Game({
     title: "Adventure Game",
 });
 
+declare global {
+    interface Window { game: Phaser.Game }
+}
+
+window.game = game;

@@ -1,12 +1,29 @@
 import 'phaser';
 
 export default class AdventureScene extends Phaser.Scene {
+    name: string
+    // @ts-ignore
+    inventory: string[]
+    // @ts-ignore
+    transitionDuration: number
+    // @ts-ignore
+    w: number
+    // @ts-ignore
+    h: number
+    // @ts-ignore
+    s: number
+    // @ts-ignore
+    messageBox: Phaser.GameObjects.Text
+    // @ts-ignore
+    inventoryBanner: Phaser.GameObjects.Text
+    // @ts-ignore
+    inventoryTexts: Phaser.GameObjects.Text[]
 
-    init(data) {
+    init(data: { inventory?: string[] }) {
         this.inventory = data.inventory || [];
     }
 
-    constructor(key, name) {
+    constructor(key: string, name: string) {
         super(key);
         this.name = name;
     }
@@ -14,24 +31,23 @@ export default class AdventureScene extends Phaser.Scene {
     create() {
         this.transitionDuration = 1000;
 
-        this.w = this.game.config.width;
-        this.h = this.game.config.height;
-        this.s = this.game.config.width * 0.01;
+        this.w = this.game.config.width as number;
+        this.h = this.game.config.height as number;
+        this.s = this.w * 0.01;
 
         this.cameras.main.setBackgroundColor('#444');
         this.cameras.main.fadeIn(this.transitionDuration, 0, 0, 0);
 
         this.add.rectangle(this.w * 0.75, 0, this.w * 0.25, this.h).setOrigin(0, 0).setFillStyle(0);
-        this.add.text(this.w * 0.75 + this.s, this.s)
-            .setText(this.name)
+        this.add.text(this.w * 0.75 + this.s, this.s, this.name)
             .setStyle({ fontSize: `${3 * this.s}px` })
             .setWordWrapWidth(this.w * 0.25 - 2 * this.s);
         
-        this.messageBox = this.add.text(this.w * 0.75 + this.s, this.h * 0.33)
+        this.messageBox = this.add.text(this.w * 0.75 + this.s, this.h * 0.33, "")
             .setStyle({ fontSize: `${2 * this.s}px`, color: '#eea' })
             .setWordWrapWidth(this.w * 0.25 - 2 * this.s);
 
-        this.inventoryBanner = this.add.text(this.w * 0.75 + this.s, this.h * 0.66)
+        this.inventoryBanner = this.add.text(this.w * 0.75 + this.s, this.h * 0.66, "")
             .setStyle({ fontSize: `${2 * this.s}px` })
             .setText("Inventory")
             .setAlpha(0);
@@ -55,7 +71,7 @@ export default class AdventureScene extends Phaser.Scene {
 
     }
 
-    showMessage(message) {
+    showMessage(message: string) {
         this.messageBox.setText(message);
         this.tweens.add({
             targets: this.messageBox,
@@ -84,7 +100,7 @@ export default class AdventureScene extends Phaser.Scene {
         }
         this.inventoryTexts = [];
         let h = this.h * 0.66 + 3 * this.s;
-        this.inventory.forEach((e, i) => {
+        this.inventory.forEach((e: string) => {
             let text = this.add.text(this.w * 0.75 + 2 * this.s, h, e)
                 .setStyle({ fontSize: `${1.5 * this.s}px` })
                 .setWordWrapWidth(this.w * 0.75 + 4 * this.s);
@@ -93,11 +109,11 @@ export default class AdventureScene extends Phaser.Scene {
         });
     }
 
-    hasItem(item) {
+    hasItem(item: string) {
         return this.inventory.includes(item);
     }
 
-    gainItem(item) {
+    gainItem(item: string) {
         if (this.inventory.includes(item)) {
             console.warn('gaining item already held:', item);
             return;
@@ -117,7 +133,7 @@ export default class AdventureScene extends Phaser.Scene {
         }
     }
 
-    loseItem(item) {
+    loseItem(item: string) {
         if (!this.inventory.includes(item)) {
             console.warn('losing item not held:', item);
             return;
@@ -139,7 +155,7 @@ export default class AdventureScene extends Phaser.Scene {
         });
     }
 
-    gotoScene(key) {
+    gotoScene(key: string) {
         this.cameras.main.fade(this.transitionDuration, 0, 0, 0);
         this.time.delayedCall(this.transitionDuration, () => {
             this.scene.start(key, { inventory: this.inventory });
