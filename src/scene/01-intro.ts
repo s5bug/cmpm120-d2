@@ -20,9 +20,13 @@ export default class IntroScene extends Phaser.Scene {
         const w = this.game.config.width as number;
         const h = this.game.config.height as number;
 
-        this.loadCrow = import('./02-crow-era.ts').then(crowModule => {
-            this.game.scene.add('crow-era', crowModule.default)
-        })
+        if(this.game.scene.getScene('crow-era')) {
+            this.loadCrow = Promise.resolve()
+        } else {
+            this.loadCrow = import('./02-crow-era.ts').then(crowModule => {
+                this.game.scene.add('crow-era', crowModule.default)
+            })
+        }
 
         this.companyLogo = this.add.sprite(w / 2, h / 2, 'fisj-enterprises')
         this.companyLogo.alpha = 0.0
@@ -48,6 +52,6 @@ export default class IntroScene extends Phaser.Scene {
 
         this.tweens.add(fadeLogoIn)
 
-        debugCode(this, () => this.loadCrow.then(() => this.scene.start('crow-era')))
+        debugCode("x", this, () => this.loadCrow.then(() => this.scene.start('crow-era')))
     }
 }
