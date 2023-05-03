@@ -15,8 +15,8 @@ export default class AdventureScene extends Phaser.Scene {
         this.inventory = data.inventory || [];
     }
 
-    constructor(key: string, name: string) {
-        super(key);
+    constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string) {
+        super(config);
         this.name = name;
     }
 
