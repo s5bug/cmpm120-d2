@@ -10,6 +10,8 @@ export default class CrowEra extends AdventureScene {
     }
 
     create() {
+        super.create()
+
         this.loadDartfrog = import('./03-dartfrog-era.ts').then(dartfrogModule => {
             this.game.scene.add('dartfrog-era', dartfrogModule.default)
         })

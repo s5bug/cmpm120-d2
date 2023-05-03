@@ -1,6 +1,6 @@
 import 'phaser';
 
-import IntroScene from "./scenes/01-intro.ts";
+import IntroScene from "./scene/01-intro.ts";
 
 // class Demo1 extends AdventureScene {
 //     constructor() {
