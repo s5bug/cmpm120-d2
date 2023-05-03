@@ -17,7 +17,7 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
         )
         let itemTxt = new Phaser.GameObjects.Text(
             scene,
-            0,
+            itemImg.width / 2,
             0,
             items[itemName].name,
             {}

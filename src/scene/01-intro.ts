@@ -3,6 +3,8 @@ import 'phaser';
 import FisjEnterprises from '../assets/fisjenterprises.png';
 import debugCode from "../debug-code.ts";
 
+import FishgirlImage from '../assets/fishgirl.png';
+
 export default class IntroScene extends Phaser.Scene {
     loadCrow!: Promise<void>
 
@@ -23,7 +25,16 @@ export default class IntroScene extends Phaser.Scene {
         if(this.game.scene.getScene('crow-era')) {
             this.loadCrow = Promise.resolve()
         } else {
-            this.loadCrow = import('./02-crow-era.ts').then(crowModule => {
+            this.load.image('fishgirl', FishgirlImage)
+
+            let loadAssetsComplete: Promise<void> = new Promise<void>(resolve => {
+                this.load.start()
+                this.load.on(Phaser.Loader.Events.COMPLETE, () => resolve())
+            })
+
+            let loadModuleComplete = import('./02-crow-era.ts')
+
+            this.loadCrow = loadAssetsComplete.then(() => loadModuleComplete).then(crowModule => {
                 this.game.scene.add('crow-era', crowModule.default)
             })
         }
