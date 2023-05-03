@@ -1,7 +1,5 @@
 import 'phaser';
 
-import items from "./items-list.ts";
-
 export default class AdventureScene extends Phaser.Scene {
     name: string
     subtitle: string | undefined

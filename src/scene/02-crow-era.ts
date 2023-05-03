@@ -2,6 +2,7 @@ import 'phaser';
 
 import AdventureScene from "../adventure.ts";
 import ItemSprite from "../item-sprite.ts";
+import debugCode from "../debug-code.ts";
 
 export default class CrowEra extends AdventureScene {
     loadDartfrog!: Promise<void>
@@ -26,16 +27,6 @@ export default class CrowEra extends AdventureScene {
         )
         this.add.existing(this.soccerBall)
 
-        let debugCombo =
-            this.input.keyboard?.createCombo(
-                'WHATSLIGMA',
-                {}
-            )
-
-        this.input.keyboard?.on('keycombomatch', (cb: Phaser.Input.Keyboard.KeyCombo, _: KeyboardEvent) => {
-            if(cb == debugCombo) {
-                this.loadDartfrog.then(() => this.scene.start('dartfrog-era'))
-            }
-        })
+        debugCode(this, () => this.loadDartfrog.then(() => this.scene.start('dartfrog-era')))
     }
 }

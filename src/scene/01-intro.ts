@@ -1,6 +1,7 @@
 import 'phaser';
 
 import FisjEnterprises from '../assets/fisjenterprises.png';
+import debugCode from "../debug-code.ts";
 
 export default class IntroScene extends Phaser.Scene {
     loadCrow!: Promise<void>
@@ -47,16 +48,6 @@ export default class IntroScene extends Phaser.Scene {
 
         this.tweens.add(fadeLogoIn)
 
-        let debugCombo =
-            this.input.keyboard?.createCombo(
-                'WHATSLIGMA',
-                {}
-            )
-
-        this.input.keyboard?.on('keycombomatch', (cb: Phaser.Input.Keyboard.KeyCombo, _: KeyboardEvent) => {
-            if(cb == debugCombo) {
-                this.loadCrow.then(() => this.scene.start('crow-era'))
-            }
-        })
+        debugCode(this, () => this.loadCrow.then(() => this.scene.start('crow-era')))
     }
 }
