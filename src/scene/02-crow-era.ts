@@ -52,6 +52,10 @@ export default class CrowEra extends AdventureScene {
         )
         this.add.existing(this.riverOfTime)
 
+        this.riverOfTime.itemImg.on('pointerover', () => {
+            this.showMessage("A great flowing river. It has been said to send those who wish into the future.")
+        })
+
         this.fishgirl = new ItemSprite(
             this,
             'fishgirl',
@@ -59,6 +63,10 @@ export default class CrowEra extends AdventureScene {
             this.h * 3 / 4
         )
         this.add.existing(this.fishgirl)
+
+        this.fishgirl.itemImg.on('pointerover', () => {
+            this.showMessage("It me!")
+        })
 
         debugCode("x", this, () => this.loadDartfrog.then(() => this.scene.start('dartfrog-era')))
     }

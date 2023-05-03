@@ -27,9 +27,16 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
         this.itemTxt = itemTxt;
 
         this.itemTxt.alpha = 0.0;
+        this.itemTxt.scale = 0.0;
 
         this.itemImg.setInteractive()
-        this.itemImg.on('pointerover', () => this.itemTxt.alpha = 1.0)
-        this.itemImg.on('pointerout', () => this.itemTxt.alpha = 0.0)
+        this.itemImg.on('pointerover', () => {
+            this.itemTxt.scale = 1.0
+            this.itemTxt.alpha = 1.0
+        })
+        this.itemImg.on('pointerout', () => {
+            this.itemTxt.alpha = 0.0
+            this.itemTxt.scale = 0.0
+        })
     }
 }
