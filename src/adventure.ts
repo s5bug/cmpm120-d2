@@ -2,22 +2,14 @@ import 'phaser';
 
 export default class AdventureScene extends Phaser.Scene {
     name: string
-    // @ts-ignore
-    inventory: string[]
-    // @ts-ignore
-    transitionDuration: number
-    // @ts-ignore
-    w: number
-    // @ts-ignore
-    h: number
-    // @ts-ignore
-    s: number
-    // @ts-ignore
-    messageBox: Phaser.GameObjects.Text
-    // @ts-ignore
-    inventoryBanner: Phaser.GameObjects.Text
-    // @ts-ignore
-    inventoryTexts: Phaser.GameObjects.Text[]
+    inventory!: string[]
+    transitionDuration!: number
+    w!: number
+    h!: number
+    s!: number
+    messageBox!: Phaser.GameObjects.Text
+    inventoryBanner!: Phaser.GameObjects.Text
+    inventoryTexts!: Phaser.GameObjects.Text[]
 
     init(data: { inventory?: string[] }) {
         this.inventory = data.inventory || [];
