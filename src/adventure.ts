@@ -1,7 +1,10 @@
 import 'phaser';
 
+import items from "./items-list.ts";
+
 export default class AdventureScene extends Phaser.Scene {
     name: string
+    subtitle: string | undefined
     inventory!: string[]
     transitionDuration!: number
     w!: number
@@ -15,9 +18,10 @@ export default class AdventureScene extends Phaser.Scene {
         this.inventory = data.inventory || [];
     }
 
-    constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string) {
+    constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string) {
         super(config);
         this.name = name;
+        this.subtitle = subtitle;
     }
 
     create() {
@@ -31,10 +35,16 @@ export default class AdventureScene extends Phaser.Scene {
         this.cameras.main.fadeIn(this.transitionDuration, 0, 0, 0);
 
         this.add.rectangle(this.w * 0.75, 0, this.w * 0.25, this.h).setOrigin(0, 0).setFillStyle(0);
-        this.add.text(this.w * 0.75 + this.s, this.s, this.name)
+        let titleText = this.add.text(this.w * 0.75 + this.s, this.s, this.name)
             .setStyle({ fontSize: `${3 * this.s}px` })
             .setWordWrapWidth(this.w * 0.25 - 2 * this.s);
-        
+
+        if(this.subtitle) {
+            this.add.text(this.w * 0.75 + this.s, titleText.y + titleText.height + this.s, this.subtitle)
+                .setStyle({ fontSize: `${2 * this.s}px`, color: "#AAAAAA" })
+                .setWordWrapWidth(this.w * 0.25 - 2 * this.s)
+        }
+
         this.messageBox = this.add.text(this.w * 0.75 + this.s, this.h * 0.33, "")
             .setStyle({ fontSize: `${2 * this.s}px`, color: '#eea' })
             .setWordWrapWidth(this.w * 0.25 - 2 * this.s);
@@ -60,7 +70,6 @@ export default class AdventureScene extends Phaser.Scene {
             });
 
         this.onEnter();
-
     }
 
     showMessage(message: string) {

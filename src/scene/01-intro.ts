@@ -46,5 +46,17 @@ export default class IntroScene extends Phaser.Scene {
             () => this.loadCrow.then(() => this.tweens.add(fadeLogoOut))
 
         this.tweens.add(fadeLogoIn)
+
+        let debugCombo =
+            this.input.keyboard?.createCombo(
+                'WHATSLIGMA',
+                {}
+            )
+
+        this.input.keyboard?.on('keycombomatch', (cb: Phaser.Input.Keyboard.KeyCombo, _: KeyboardEvent) => {
+            if(cb == debugCombo) {
+                this.loadCrow.then(() => this.scene.start('crow-era'))
+            }
+        })
     }
 }

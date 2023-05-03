@@ -130,6 +130,9 @@ const game = new Phaser.Game({
         height: 1080
     },
     title: "CMPM D2",
+    input: {
+        keyboard: true,
+    },
 });
 
 game.scene.add('intro', IntroScene, true)
