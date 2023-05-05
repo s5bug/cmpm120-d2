@@ -70,8 +70,6 @@ export default abstract class AdventureScene extends Progresser {
                     this.scale.startFullscreen();
                 }
             });
-
-        this.onEnter();
     }
 
     showMessage(message: string) {
@@ -181,9 +179,5 @@ export default abstract class AdventureScene extends Progresser {
                 })
             })
         }
-    }
-
-    onEnter() {
-        console.warn('This AdventureScene did not implement onEnter():', this.constructor.name);
     }
 }
