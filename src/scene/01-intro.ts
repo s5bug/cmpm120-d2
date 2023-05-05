@@ -5,8 +5,6 @@ import Progresser from "../progresser.ts";
 import FisjEnterprises from '../assets/fisjenterprises.png';
 import debugCode from "../debug-code.ts";
 
-import CrowEraScene from './02-crow-era.ts?url';
-
 import FishgirlImage from '../assets/fishgirl.png';
 
 export default class IntroScene extends Progresser {
@@ -21,8 +19,7 @@ export default class IntroScene extends Progresser {
     }
 
     setupNextLoader() {
-        // @ts-ignore
-        this.load.sceneModule('crow-era', CrowEraScene, 'module')
+        this.load.sceneModule('crow-era', () => import('./02-crow-era.ts'))
 
         this.load.image('fishgirl', FishgirlImage)
     }

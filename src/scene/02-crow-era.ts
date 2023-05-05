@@ -4,8 +4,6 @@ import AdventureScene from "../adventure.ts";
 import ItemSprite from "../item-sprite.ts";
 import debugCode from "../debug-code.ts";
 
-import DartfrogEraScene from "./03-dartfrog-era.ts?url";
-
 export default class CrowEra extends AdventureScene {
     soccerBall!: ItemSprite
     guy!: ItemSprite
@@ -17,8 +15,7 @@ export default class CrowEra extends AdventureScene {
     }
 
     setupNextLoader() {
-        // @ts-ignore
-        this.load.sceneModule('dartfrog-era', DartfrogEraScene)
+        this.load.sceneModule('dartfrog-era', () => import('./03-dartfrog-era.ts'))
     }
 
     create() {

@@ -122,12 +122,12 @@ import IntroScene from "./scene/01-intro.ts";
 // }
 
 class SceneModuleFile extends Phaser.Loader.File {
-    moduleUrl: string
+    makeImport: () => Promise<{ default: typeof Phaser.Scene }>
 
-    constructor(loader: Phaser.Loader.LoaderPlugin, key: string, url: string) {
+    constructor(loader: Phaser.Loader.LoaderPlugin, key: string, makeImport: () => Promise<{ default: typeof Phaser.Scene }>) {
         super(loader, { type: 'sceneModule', key: key, url: '' });
 
-        this.moduleUrl = url;
+        this.makeImport = makeImport;
     }
 
     load() {
@@ -136,7 +136,7 @@ class SceneModuleFile extends Phaser.Loader.File {
             this.loader.nextFile(this, true)
         } else {
             let importScript: Promise<{ default: typeof Phaser.Scene }> =
-                import(/* @vite-ignore */ this.moduleUrl)
+                this.makeImport()
 
             importScript.then(module => {
                 this.loader.scene.scene.add(this.key, module.default)
@@ -153,9 +153,9 @@ class SceneModulePlugin extends Phaser.Plugins.BasePlugin {
         pluginManager.registerFileType('sceneModule', this.sceneModuleCallback)
     }
 
-    sceneModuleCallback(key: string, url: string) {
+    sceneModuleCallback(key: string, makeImport: () => Promise<{ default: typeof Phaser.Scene }>) {
         // @ts-ignore
-        this.addFile(new SceneModuleFile(this, key, url))
+        this.addFile(new SceneModuleFile(this, key, makeImport))
         return this
     }
 }

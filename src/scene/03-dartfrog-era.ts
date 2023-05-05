@@ -4,8 +4,6 @@ import AdventureScene from "../adventure.ts";
 import debugCode from "../debug-code.ts";
 import ItemSprite from "../item-sprite.ts";
 
-import BoatDocksScene from "./04-boat-docks.ts?url";
-
 export default class DartfrogEra extends AdventureScene {
     guy!: ItemSprite
     fishgirl!: ItemSprite
@@ -16,8 +14,7 @@ export default class DartfrogEra extends AdventureScene {
     }
 
     setupNextLoader() {
-        // @ts-ignore
-        this.load.sceneModule('boat-docks', BoatDocksScene)
+        this.load.sceneModule('boat-docks', () => import('./04-boat-docks.ts'))
     }
 
     create() {
