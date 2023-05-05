@@ -104,13 +104,18 @@ export default abstract class AdventureScene extends Progresser {
         this.inventoryItems = [];
         let h = this.h * 0.66 + 3 * this.s;
         this.inventory.forEach((e: string) => {
-            let text = this.add.text(this.w * 0.75 + 2 * this.s, h, e)
-                .setStyle({ fontSize: `${1.5 * this.s}px` })
-                .setWordWrapWidth(this.w * 0.75 + 4 * this.s);
-            h += text.height + this.s;
+            // let text = this.add.text(this.w * 0.75 + 2 * this.s, h, e)
+            //     .setStyle({ fontSize: `${1.5 * this.s}px` })
+            //     .setWordWrapWidth(this.w * 0.75 + 4 * this.s);
+            // h += text.height + this.s;
 
             let item = new ItemSprite(this, e, this.w * 0.75 + 2 * this.s, h, true)
-            this.inventoryItems.push(item);
+            item.itemImg.scale = (item.itemTxt.height / item.itemImg.height)
+            this.add.existing(item)
+
+            h += item.height;
+
+            this.inventoryItems.push(item)
         });
     }
 
@@ -126,7 +131,7 @@ export default abstract class AdventureScene extends Progresser {
         this.inventory.push(itemName);
         this.updateInventory();
         for (let item of this.inventoryItems) {
-            if (item.itemTxt.text == itemName) {
+            if (item.itemName == itemName) {
                 this.tweens.add({
                     targets: item,
                     x: { from: item.x - 20, to: item.x },
@@ -144,7 +149,7 @@ export default abstract class AdventureScene extends Progresser {
             return;
         }
         for (let item of this.inventoryItems) {
-            if (item.itemTxt.text == itemName) {
+            if (item.itemName == itemName) {
                 this.tweens.add({
                     targets: item,
                     x: { from: item.x, to: item.x + 20 },

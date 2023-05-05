@@ -3,8 +3,10 @@ import 'phaser';
 import items from "./items-list.ts";
 
 export default class ItemSprite extends Phaser.GameObjects.Container {
-    itemImg: Phaser.GameObjects.Sprite;
-    itemTxt: Phaser.GameObjects.Text;
+    itemName: string
+    inventory: boolean
+    itemImg: Phaser.GameObjects.Sprite
+    itemTxt: Phaser.GameObjects.Text
 
     constructor(scene: Phaser.Scene, itemName: string, x?: number, y?: number, inventory?: boolean) {
         if(!items[itemName]) alert(`Alerta! You have not defined the item ${itemName}!`)
@@ -15,21 +17,36 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
             0,
             items[itemName].sprite
         )
+        itemImg.setOrigin(0, 0)
         let itemTxt = new Phaser.GameObjects.Text(
             scene,
-            itemImg.width / 2,
+            0,
             0,
             items[itemName].name,
             {}
         )
-        super(scene, x, y, [itemImg, itemTxt]);
-        this.itemImg = itemImg;
-        this.itemTxt = itemTxt;
+        itemTxt.setOrigin(0, 0.5)
+        super(scene, x, y, [itemImg, itemTxt])
+        this.itemName = itemName
+        this.inventory = inventory || false
+        this.itemImg = itemImg
+        this.itemTxt = itemTxt
+    }
 
-        this.itemTxt.alpha = 0.0;
-        this.itemTxt.scale = 0.0;
+    addedToScene() {
+        super.addedToScene();
 
-        if(inventory != true) {
+        if(this.inventory) {
+            this.itemImg.setScale(2 * (this.itemTxt.height / this.itemImg.height))
+        }
+
+        this.itemTxt.x = (this.itemImg.width * this.itemImg.scale)
+        this.itemTxt.y = ((this.itemImg.height * this.itemImg.scale) / 2)
+
+        if(!this.inventory) {
+            this.itemTxt.alpha = 0.0
+            this.itemTxt.scale = 0.0
+
             this.itemImg.setInteractive()
             this.itemImg.on('pointerover', () => {
                 this.itemTxt.scale = 1.0
