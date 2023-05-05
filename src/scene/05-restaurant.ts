@@ -16,6 +16,6 @@ export default class Restaurant extends AdventureScene {
         super.create();
 
         debugCode("x", this, () => this.gotoScene('tunnel', undefined, true))
-        debugCode("c", this, () => this.gotoScene('lecture-hall', undefined, true))
+        debugCode("c", this, () => this.gotoScene('boat-docks', undefined, true))
     }
 }
