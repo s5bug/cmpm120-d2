@@ -4,8 +4,9 @@ import AdventureScene from "../adventure.ts";
 import debugCode from "../debug-code.ts";
 import ItemSprite from "../item-sprite.ts";
 
+import BoatDocksScene from "./04-boat-docks.ts?url";
+
 export default class DartfrogEra extends AdventureScene {
-    loadBoatDocks!: Promise<void>
     guy!: ItemSprite
     fishgirl!: ItemSprite
     docks!: ItemSprite
@@ -14,16 +15,13 @@ export default class DartfrogEra extends AdventureScene {
         super(config, "Va\'weál", "Era of The Dartfrog\nYear 5762");
     }
 
+    setupNextLoader() {
+        // @ts-ignore
+        this.load.sceneModule('boat-docks', BoatDocksScene)
+    }
+
     create() {
         super.create()
-
-        if(this.game.scene.getScene('boat-docks')) {
-            this.loadBoatDocks = Promise.resolve()
-        } else {
-            this.loadBoatDocks = import('./04-boat-docks.ts').then(boatDocksModule => {
-                this.game.scene.add('boat-docks', boatDocksModule.default)
-            })
-        }
 
         this.guy = new ItemSprite(
             this,
@@ -51,6 +49,6 @@ export default class DartfrogEra extends AdventureScene {
         )
         this.add.existing(this.docks)
 
-        debugCode("x", this, () => this.loadBoatDocks.then(() => this.scene.start('boat-docks')))
+        debugCode("x", this, () => this.gotoScene('boat-docks', undefined, true))
     }
 }

@@ -3,34 +3,25 @@ import 'phaser';
 import AdventureScene from "../adventure.ts";
 import debugCode from "../debug-code.ts";
 
-export default class BoatDocks extends AdventureScene {
-    loadRestaurant!: Promise<void>;
-    loadLectureHall!: Promise<void>;
+import RestaurantScene from "./05-restaurant.ts?url";
+import LectureHallScene from "./07-lecture-hall.ts?url";
 
+export default class BoatDocks extends AdventureScene {
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
         super(config, "Boat Docks", "Va'weál\nDartfrog 5762");
+    }
+
+    setupNextLoader() {
+        // @ts-ignore
+        this.load.sceneModule('restaurant', RestaurantScene)
+        // @ts-ignore
+        this.load.sceneModule('lecture-hall', LectureHallScene)
     }
 
     create() {
         super.create();
 
-        if(this.game.scene.getScene('restaurant')) {
-            this.loadRestaurant = Promise.resolve()
-        } else {
-            this.loadRestaurant = import('./05-restaurant.ts').then(restaurantModule => {
-                this.game.scene.add('restaurant', restaurantModule.default)
-            })
-        }
-
-        if(this.game.scene.getScene('lecture-hall')) {
-            this.loadLectureHall = Promise.resolve()
-        } else {
-            this.loadLectureHall = import('./07-lecture-hall.ts').then(lectureHallModule => {
-                this.game.scene.add('lecture-hall', lectureHallModule.default)
-            })
-        }
-
-        debugCode("x", this, () => this.loadRestaurant.then(() => this.scene.start('restaurant')))
-        debugCode("c", this, () => this.loadLectureHall.then(() => this.scene.start('lecture-hall')))
+        debugCode("x", this, () => this.gotoScene('restaurant', undefined, true))
+        debugCode("c", this, () => this.gotoScene('lecture-hall', undefined, true))
     }
 }

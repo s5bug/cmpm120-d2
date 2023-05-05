@@ -1,13 +1,15 @@
 import 'phaser';
 
+import Progresser from "../progresser.ts";
+
 import FisjEnterprises from '../assets/fisjenterprises.png';
 import debugCode from "../debug-code.ts";
 
+import CrowEraScene from './02-crow-era.ts?url';
+
 import FishgirlImage from '../assets/fishgirl.png';
 
-export default class IntroScene extends Phaser.Scene {
-    loadCrow!: Promise<void>
-
+export default class IntroScene extends Progresser {
     companyLogo!: Phaser.GameObjects.Sprite
 
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
@@ -18,26 +20,18 @@ export default class IntroScene extends Phaser.Scene {
         this.load.image('fisj-enterprises', FisjEnterprises)
     }
 
+    setupNextLoader() {
+        // @ts-ignore
+        this.load.sceneModule('crow-era', CrowEraScene, 'module')
+
+        this.load.image('fishgirl', FishgirlImage)
+    }
+
     create() {
+        super.create()
+
         const w = this.game.config.width as number;
         const h = this.game.config.height as number;
-
-        if(this.game.scene.getScene('crow-era')) {
-            this.loadCrow = Promise.resolve()
-        } else {
-            this.load.image('fishgirl', FishgirlImage)
-
-            let loadAssetsComplete: Promise<void> = new Promise<void>(resolve => {
-                this.load.start()
-                this.load.on(Phaser.Loader.Events.COMPLETE, () => resolve())
-            })
-
-            let loadModuleComplete = import('./02-crow-era.ts')
-
-            this.loadCrow = loadAssetsComplete.then(() => loadModuleComplete).then(crowModule => {
-                this.game.scene.add('crow-era', crowModule.default)
-            })
-        }
 
         this.companyLogo = this.add.sprite(w / 2, h / 2, 'fisj-enterprises')
         this.companyLogo.alpha = 0.0
@@ -49,20 +43,30 @@ export default class IntroScene extends Phaser.Scene {
             duration: 1500
         }
 
-        let fadeLogoOut: Phaser.Types.Tweens.TweenBuilderConfig = {
-            targets: this.companyLogo,
-            alpha: 0.0,
-            ease: Phaser.Math.Easing.Expo.Out,
-            duration: 1500,
-            onComplete: () => this.scene.start('crow-era')
-        }
-
         fadeLogoIn.completeDelay = 2000
-        fadeLogoIn.onComplete =
-            () => this.loadCrow.then(() => this.tweens.add(fadeLogoOut))
+        fadeLogoIn.onComplete = () => this.gotoScene('crow-era')
 
         this.tweens.add(fadeLogoIn)
 
-        debugCode("x", this, () => this.loadCrow.then(() => this.scene.start('crow-era')))
+        debugCode("x", this, () => this.gotoScene('crow-era', undefined, true))
+    }
+
+    beforeSceneSwitch(key: string, fast: boolean): void | Promise<void> {
+        key;
+        if(fast) {
+            return
+        } else {
+            return new Promise(resolve => {
+                let fadeLogoOut: Phaser.Types.Tweens.TweenBuilderConfig = {
+                    targets: this.companyLogo,
+                    alpha: 0.0,
+                    ease: Phaser.Math.Easing.Expo.Out,
+                    duration: 1500,
+                    onComplete: () => resolve()
+                }
+
+                this.tweens.add(fadeLogoOut)
+            })
+        }
     }
 }

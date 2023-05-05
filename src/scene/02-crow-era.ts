@@ -4,8 +4,9 @@ import AdventureScene from "../adventure.ts";
 import ItemSprite from "../item-sprite.ts";
 import debugCode from "../debug-code.ts";
 
+import DartfrogEraScene from "./03-dartfrog-era.ts?url";
+
 export default class CrowEra extends AdventureScene {
-    loadDartfrog!: Promise<void>
     soccerBall!: ItemSprite
     guy!: ItemSprite
     riverOfTime!: ItemSprite
@@ -15,16 +16,13 @@ export default class CrowEra extends AdventureScene {
         super(config, "Va\'weál", "Era of The Crow\nYear 978");
     }
 
+    setupNextLoader() {
+        // @ts-ignore
+        this.load.sceneModule('dartfrog-era', DartfrogEraScene)
+    }
+
     create() {
         super.create()
-
-        if(this.game.scene.getScene('dartfrog-era')) {
-            this.loadDartfrog = Promise.resolve()
-        } else {
-            this.loadDartfrog = import('./03-dartfrog-era.ts').then(dartfrogModule => {
-                this.game.scene.add('dartfrog-era', dartfrogModule.default)
-            })
-        }
 
         this.soccerBall = new ItemSprite(
             this,
@@ -68,6 +66,6 @@ export default class CrowEra extends AdventureScene {
             this.showMessage("It me!")
         })
 
-        debugCode("x", this, () => this.loadDartfrog.then(() => this.scene.start('dartfrog-era')))
+        debugCode("x", this, () => this.gotoScene('dartfrog-era', undefined, true))
     }
 }

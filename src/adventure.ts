@@ -1,6 +1,8 @@
 import 'phaser';
+import ItemSprite from "./item-sprite.ts";
+import Progresser from "./progresser.ts";
 
-export default class AdventureScene extends Phaser.Scene {
+export default abstract class AdventureScene extends Progresser {
     name: string
     subtitle: string | undefined
     inventory!: string[]
@@ -10,19 +12,21 @@ export default class AdventureScene extends Phaser.Scene {
     s!: number
     messageBox!: Phaser.GameObjects.Text
     inventoryBanner!: Phaser.GameObjects.Text
-    inventoryTexts!: Phaser.GameObjects.Text[]
+    inventoryItems!: ItemSprite[]
 
     init(data: { inventory?: string[] }) {
         this.inventory = data.inventory || [];
     }
 
-    constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string) {
+    protected constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string) {
         super(config);
         this.name = name;
         this.subtitle = subtitle;
     }
 
     create() {
+        super.create()
+
         this.transitionDuration = 1000;
 
         this.w = this.game.config.width as number;
@@ -52,7 +56,7 @@ export default class AdventureScene extends Phaser.Scene {
             .setText("Inventory")
             .setAlpha(0);
 
-        this.inventoryTexts = [];
+        this.inventoryItems = [];
         this.updateInventory();
 
         this.add.text(this.w-3*this.s, this.h-3*this.s, "📺")
@@ -94,17 +98,19 @@ export default class AdventureScene extends Phaser.Scene {
                 duration: this.transitionDuration
             });
         }
-        if (this.inventoryTexts) {
-            this.inventoryTexts.forEach((t) => t.destroy());
+        if (this.inventoryItems) {
+            this.inventoryItems.forEach((i) => i.destroy());
         }
-        this.inventoryTexts = [];
+        this.inventoryItems = [];
         let h = this.h * 0.66 + 3 * this.s;
         this.inventory.forEach((e: string) => {
             let text = this.add.text(this.w * 0.75 + 2 * this.s, h, e)
                 .setStyle({ fontSize: `${1.5 * this.s}px` })
                 .setWordWrapWidth(this.w * 0.75 + 4 * this.s);
             h += text.height + this.s;
-            this.inventoryTexts.push(text);
+
+            let item = new ItemSprite(this, e, this.w * 0.75 + 2 * this.s, h, true)
+            this.inventoryItems.push(item);
         });
     }
 
@@ -112,18 +118,18 @@ export default class AdventureScene extends Phaser.Scene {
         return this.inventory.includes(item);
     }
 
-    gainItem(item: string) {
-        if (this.inventory.includes(item)) {
-            console.warn('gaining item already held:', item);
+    gainItem(itemName: string) {
+        if (this.inventory.includes(itemName)) {
+            console.warn('gaining item already held:', itemName);
             return;
         }
-        this.inventory.push(item);
+        this.inventory.push(itemName);
         this.updateInventory();
-        for (let text of this.inventoryTexts) {
-            if (text.text == item) {
+        for (let item of this.inventoryItems) {
+            if (item.itemTxt.text == itemName) {
                 this.tweens.add({
-                    targets: text,
-                    x: { from: text.x - 20, to: text.x },
+                    targets: item,
+                    x: { from: item.x - 20, to: item.x },
                     alpha: { from: 0, to: 1 },
                     ease: 'Cubic.out',
                     duration: this.transitionDuration
@@ -132,16 +138,16 @@ export default class AdventureScene extends Phaser.Scene {
         }
     }
 
-    loseItem(item: string) {
-        if (!this.inventory.includes(item)) {
-            console.warn('losing item not held:', item);
+    loseItem(itemName: string) {
+        if (!this.inventory.includes(itemName)) {
+            console.warn('losing item not held:', itemName);
             return;
         }
-        for (let text of this.inventoryTexts) {
-            if (text.text == item) {
+        for (let item of this.inventoryItems) {
+            if (item.itemTxt.text == itemName) {
                 this.tweens.add({
-                    targets: text,
-                    x: { from: text.x, to: text.x + 20 },
+                    targets: item,
+                    x: { from: item.x, to: item.x + 20 },
                     alpha: { from: 1, to: 0 },
                     ease: 'Cubic.in',
                     duration: this.transitionDuration
@@ -149,16 +155,27 @@ export default class AdventureScene extends Phaser.Scene {
             }
         }
         this.time.delayedCall(500, () => {
-            this.inventory = this.inventory.filter((e) => e != item);
+            this.inventory = this.inventory.filter((e) => e != itemName);
             this.updateInventory();
         });
     }
 
-    gotoScene(key: string) {
-        this.cameras.main.fade(this.transitionDuration, 0, 0, 0);
-        this.time.delayedCall(this.transitionDuration, () => {
-            this.scene.start(key, { inventory: this.inventory });
-        });
+    gotoScene(key: string, data?: object | undefined, fast?: boolean) {
+        super.gotoScene(key, { inventory: this.inventory, ...data }, fast)
+    }
+
+    beforeSceneSwitch(key: string, fast: boolean): void | Promise<void> {
+        key;
+        if(fast) {
+            return
+        } else {
+            return new Promise(resolve => {
+                this.cameras.main.fade(this.transitionDuration, 0, 0, 0);
+                this.time.delayedCall(this.transitionDuration, () => {
+                    resolve()
+                })
+            })
+        }
     }
 
     onEnter() {

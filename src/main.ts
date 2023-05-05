@@ -121,8 +121,102 @@ import IntroScene from "./scene/01-intro.ts";
 //     }
 // }
 
+class SceneModuleFile extends Phaser.Loader.File {
+    moduleUrl: string
+
+    constructor(loader: Phaser.Loader.LoaderPlugin, key: string, url: string) {
+        super(loader, { type: 'sceneModule', key: key, url: '' });
+
+        this.moduleUrl = url;
+    }
+
+    load() {
+        if(this.state == Phaser.Loader.FILE_POPULATED) {
+            // @ts-ignore
+            this.loader.nextFile(this, true)
+        } else {
+            let importScript: Promise<{ default: typeof Phaser.Scene }> =
+                import(/* @vite-ignore */ this.moduleUrl)
+
+            importScript.then(module => {
+                this.loader.scene.scene.add(this.key, module.default)
+                this.loader.nextFile(this, true)
+            }).catch(() => this.loader.nextFile(this, false))
+        }
+    }
+}
+
+class SceneModulePlugin extends Phaser.Plugins.BasePlugin {
+    constructor(pluginManager: Phaser.Plugins.PluginManager) {
+        super(pluginManager);
+
+        pluginManager.registerFileType('sceneModule', this.sceneModuleCallback)
+    }
+
+    sceneModuleCallback(key: string, url: string) {
+        // @ts-ignore
+        this.addFile(new SceneModuleFile(this, key, url))
+        return this
+    }
+}
+
+class TtfFile extends Phaser.Loader.File {
+    fontFamily: string
+    ttfUrl: string
+    fontObject: FontFace | undefined
+
+    constructor(loader: Phaser.Loader.LoaderPlugin, family: string, url: string) {
+        super(loader, { type: 'ttf', key: family, url: '' });
+        this.fontFamily = family;
+        this.ttfUrl = url;
+    }
+
+    load() {
+        if (this.state === Phaser.Loader.FILE_POPULATED) {
+            // @ts-ignore
+            this.loader.nextFile(this, true)
+        } else {
+            this.fontObject = new FontFace(
+                this.fontFamily,
+                `url("${this.ttfUrl}")`
+            )
+            this.fontObject.load()
+                .then(this.onLoad)
+                // @ts-ignore
+                .catch(() => this.loader.nextFile(this, false))
+        }
+    }
+
+    // @ts-ignore
+    onLoad(ff: FontFace) {
+        document.fonts.add(ff)
+        // @ts-ignore
+        this.loader.nextFile(this, true);
+    }
+}
+
+class TtfFilePlugin extends Phaser.Plugins.BasePlugin {
+    constructor(pluginManager: Phaser.Plugins.PluginManager) {
+        super(pluginManager);
+
+        pluginManager.registerFileType('ttf', this.ttfFileCallback)
+    }
+
+    ttfFileCallback(family: string, url: string) {
+        // @ts-ignore
+        this.addFile(new TtfFile(this, family, url))
+        return this
+    }
+}
 
 const game = new Phaser.Game({
+    type: Phaser.WEBGL,
+    plugins: {
+        global: [
+            { key: 'SceneModulePlugin', plugin: SceneModulePlugin, start: true },
+            { key: 'TtfFilePlugin', plugin: TtfFilePlugin, start: true },
+        ]
+    },
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
