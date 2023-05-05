@@ -17,7 +17,7 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
             0,
             items[itemName].sprite
         )
-        itemImg.setOrigin(0, 0)
+        itemImg.setOrigin(0.5, 0.5)
         let itemTxt = new Phaser.GameObjects.Text(
             scene,
             0,
@@ -40,8 +40,8 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
             this.itemImg.setScale(2 * (this.itemTxt.height / this.itemImg.height))
         }
 
-        this.itemTxt.x = (this.itemImg.width * this.itemImg.scale) + (this.itemTxt.height / 2)
-        this.itemTxt.y = ((this.itemImg.height * this.itemImg.scale) / 2)
+        this.itemTxt.x = ((this.itemImg.width / 2) * this.itemImg.scale) + (this.itemTxt.height / 2)
+        this.itemTxt.y = 0
 
         if(!this.inventory) {
             this.itemTxt.alpha = 0.0
