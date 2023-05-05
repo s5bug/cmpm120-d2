@@ -12,14 +12,48 @@ export default abstract class Progresser extends Phaser.Scene {
 
     gotoScene(key: string, data?: object | undefined, fast?: boolean) {
         if(this.load.state == Phaser.Loader.LOADER_COMPLETE) {
+            if(this.scene.isPaused(this)) this.scene.resume(this)
+
             let beforeSwitchNormalized = Promise.resolve(this.beforeSceneSwitch(key, fast || false))
             beforeSwitchNormalized.then(() => {
                 this.scene.start(key, data)
             })
         } else {
-            // TODO: draw progress bar
+            this.scene.pause(this)
 
-            this.load.on(Phaser.Loader.Events.COMPLETE, () => this.gotoScene(key, data))
+            let w = this.game.config.width as number
+            let h = this.game.config.height as number
+
+            let outline = this.add.rectangle(
+                w / 2,
+                h / 2,
+                w / 2,
+                h / 10,
+                0x808080,
+                0.5
+            )
+            outline.isStroked = true
+            outline.setStrokeStyle(8, 0xFFFFFF, 1.0)
+
+            let inline = this.add.rectangle(
+                (w / 2 - (outline.width / 2)) + 4,
+                h / 2,
+                ((w / 2) * this.load.progress) - 8,
+                (h / 10) - 8,
+                0x00FF00,
+                1.0
+            )
+            inline.setOrigin(0, 0.5)
+
+            this.load.on(Phaser.Loader.Events.PROGRESS, (progress: number) => {
+                inline.width = ((w / 2) * progress) - 8
+            })
+
+            this.load.on(Phaser.Loader.Events.COMPLETE, () => {
+                outline.destroy()
+                inline.destroy()
+                this.gotoScene(key, data)
+            })
         }
     }
 }
