@@ -38,7 +38,7 @@ export default abstract class Progresser extends Phaser.Scene {
             let inline = this.add.rectangle(
                 (w / 2 - (outline.width / 2)) + 4,
                 h / 2,
-                ((w / 2) * this.load.progress) - 8,
+                ((w / 2) - 8) * this.load.progress,
                 (h / 10) - 8,
                 0x00FF00,
                 1.0
@@ -46,13 +46,13 @@ export default abstract class Progresser extends Phaser.Scene {
             inline.setOrigin(0, 0.5)
 
             this.load.on(Phaser.Loader.Events.PROGRESS, (progress: number) => {
-                inline.width = ((w / 2) * progress) - 8
+                inline.width = ((w / 2) - 8) * progress
             })
 
             this.load.on(Phaser.Loader.Events.COMPLETE, () => {
                 outline.destroy()
                 inline.destroy()
-                this.gotoScene(key, data)
+                this.gotoScene(key, data, fast)
             })
         }
     }
