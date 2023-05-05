@@ -40,7 +40,7 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
             this.itemImg.setScale(2 * (this.itemTxt.height / this.itemImg.height))
         }
 
-        this.itemTxt.x = (this.itemImg.width * this.itemImg.scale)
+        this.itemTxt.x = (this.itemImg.width * this.itemImg.scale) + (this.itemTxt.height / 2)
         this.itemTxt.y = ((this.itemImg.height * this.itemImg.scale) / 2)
 
         if(!this.inventory) {
