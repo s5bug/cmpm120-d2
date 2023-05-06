@@ -132,7 +132,6 @@ class SceneModuleFile extends Phaser.Loader.File {
 
     load() {
         if(this.state == Phaser.Loader.FILE_POPULATED) {
-            // @ts-ignore
             this.loader.nextFile(this, true)
         } else {
             let importScript: Promise<{ default: typeof Phaser.Scene }> =
@@ -140,9 +139,17 @@ class SceneModuleFile extends Phaser.Loader.File {
 
             importScript.then(module => {
                 this.loader.scene.scene.add(this.key, module.default)
-                this.loader.nextFile(this, true)
-            }).catch(() => this.loader.nextFile(this, false))
+                this.onLoad()
+            }).catch(() => this.onError())
         }
+    }
+
+    onLoad() {
+        this.loader.nextFile(this, true)
+    }
+
+    onError() {
+        this.loader.nextFile(this, false)
     }
 }
 
@@ -183,7 +190,7 @@ class TtfFile extends Phaser.Loader.File {
             this.fontObject.load()
                 .then(this.onLoad)
                 // @ts-ignore
-                .catch(() => this.loader.nextFile(this, false))
+                .catch(() => this.onError())
         }
     }
 
@@ -191,7 +198,12 @@ class TtfFile extends Phaser.Loader.File {
     onLoad(ff: FontFace) {
         document.fonts.add(ff)
         // @ts-ignore
-        this.loader.nextFile(this, true);
+        this.loader.nextFile(this, true)
+    }
+
+    onError() {
+        // @ts-ignore
+        this.loader.nextFile(this, false)
     }
 }
 

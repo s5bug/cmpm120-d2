@@ -17,8 +17,6 @@ export default abstract class Progresser extends Phaser.Scene {
 
         this.lock = true
         if(this.load.state == Phaser.Loader.LOADER_COMPLETE) {
-            if(this.scene.isPaused(this)) this.scene.resume(this)
-
             let beforeSwitchNormalized = Promise.resolve(this.beforeSceneSwitch(key, fast || false))
             beforeSwitchNormalized.then(() => {
                 this.lock = false
@@ -59,6 +57,7 @@ export default abstract class Progresser extends Phaser.Scene {
                 outline.destroy()
                 inline.destroy()
 
+                this.scene.resume(this)
                 this.lock = false
                 this.gotoScene(key, data, fast)
             })
