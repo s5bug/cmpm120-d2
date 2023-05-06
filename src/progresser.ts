@@ -58,8 +58,15 @@ export default abstract class Progresser extends Phaser.Scene {
                 inline.destroy()
 
                 this.scene.resume(this)
-                this.lock = false
-                this.time.delayedCall(1, () => this.gotoScene(key, data, fast))
+
+                let beforeSwitchNormalized = Promise.resolve(this.beforeSceneSwitch(key, fast || false))
+
+                this.scene.scene.events.on(Phaser.Scenes.Events.RESUME, () => {
+                    beforeSwitchNormalized.then(() => {
+                        this.lock = false
+                        this.scene.start(key, data)
+                    })
+                })
             })
         }
     }
