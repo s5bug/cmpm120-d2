@@ -59,7 +59,7 @@ export default abstract class Progresser extends Phaser.Scene {
 
                 this.scene.resume(this)
                 this.lock = false
-                this.time.delayedCall(0, () => this.gotoScene(key, data, fast))
+                this.time.delayedCall(1, () => this.gotoScene(key, data, fast))
             })
         }
     }
