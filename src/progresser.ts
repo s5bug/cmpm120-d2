@@ -58,6 +58,8 @@ export default abstract class Progresser extends Phaser.Scene {
             this.load.on(Phaser.Loader.Events.COMPLETE, () => {
                 outline.destroy()
                 inline.destroy()
+
+                this.lock = false
                 this.gotoScene(key, data, fast)
             })
         }
