@@ -10,12 +10,18 @@ export default abstract class Progresser extends Phaser.Scene {
 
     beforeSceneSwitch(key: string, fast: boolean): void | Promise<void> { key; fast; }
 
+    private lock: boolean = false
+
     gotoScene(key: string, data?: object | undefined, fast?: boolean) {
+        if(this.lock) return;
+
+        this.lock = true
         if(this.load.state == Phaser.Loader.LOADER_COMPLETE) {
             if(this.scene.isPaused(this)) this.scene.resume(this)
 
             let beforeSwitchNormalized = Promise.resolve(this.beforeSceneSwitch(key, fast || false))
             beforeSwitchNormalized.then(() => {
+                this.lock = false
                 this.scene.start(key, data)
             })
         } else {
