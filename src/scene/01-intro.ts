@@ -5,6 +5,7 @@ import Progresser from "../progresser.ts";
 import FisjEnterprises from '../assets/fisjenterprises.png';
 import debugCode from "../debug-code.ts";
 
+import Sparkle from '../assets/sparkle.png';
 import CrowEraBackground from '../assets/02-crow-era/background.png';
 import CrowEraSun from '../assets/02-crow-era/sun.png';
 import CrowEraBackLayer from '../assets/02-crow-era/back-layer.png';
@@ -26,12 +27,40 @@ export default class IntroScene extends Progresser {
     setupNextLoader() {
         this.load.sceneModule('crow-era', () => import('./02-crow-era.ts'))
 
+        this.load.spritesheet('sparkle', Sparkle, { frameWidth: 32, frameHeight: 32 })
+        this.load.spritesheet('fishgirl', FishgirlImage, { frameWidth: 64, frameHeight: 128 })
+        this.load.on(Phaser.Loader.Events.COMPLETE, () => {
+            this.anims.create({
+                key: 'sparkle-sparkle',
+                frameRate: 3,
+                frames: this.anims.generateFrameNumbers('sparkle', { start: 0, end: 1 }),
+                repeat: -1
+            })
+            this.anims.create({
+                key: 'fishgirl-left',
+                frameRate: 2,
+                frames: this.anims.generateFrameNumbers('fishgirl', { start: 4, end: 5 }),
+                repeat: -1,
+            })
+            this.anims.create({
+                key: 'fishgirl-idle',
+                frameRate: 2,
+                frames: this.anims.generateFrameNumbers('fishgirl', { start: 0, end: 1 }),
+                repeat: -1
+            })
+            this.anims.create({
+                key: 'fishgirl-right',
+                frameRate: 2,
+                frames: this.anims.generateFrameNumbers('fishgirl', { start: 2, end: 3 }),
+                repeat: -1
+            })
+        })
+
         this.load.image('crow-era-background', CrowEraBackground)
         this.load.image('crow-era-sun', CrowEraSun)
         this.load.image('crow-era-back-layer', CrowEraBackLayer)
         this.load.image('crow-era-middle-layer', CrowEraMiddleLayer)
         this.load.image('river-of-time', RiverOfTime)
-        this.load.spritesheet('fishgirl', FishgirlImage, { frameWidth: 64, frameHeight: 128 })
     }
 
     create() {

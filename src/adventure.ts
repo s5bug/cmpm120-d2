@@ -2,9 +2,15 @@ import 'phaser';
 import ItemSprite from "./item-sprite.ts";
 import Progresser from "./progresser.ts";
 
+export type Paths =  {
+    locations: Record<string, Phaser.Math.Vector2>,
+    paths: Record<string, [string, string]>,
+}
+
 export default abstract class AdventureScene extends Progresser {
     name: string
     subtitle: string | undefined
+    paths: Paths
     inventory!: string[]
     transitionDuration!: number
     w!: number
@@ -18,10 +24,11 @@ export default abstract class AdventureScene extends Progresser {
         this.inventory = data.inventory || [];
     }
 
-    protected constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string) {
+    protected constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string, paths?: Paths) {
         super(config);
         this.name = name;
         this.subtitle = subtitle;
+        this.paths = paths || { locations: {}, paths: {} };
     }
 
     create() {
@@ -111,16 +118,11 @@ export default abstract class AdventureScene extends Progresser {
         this.inventoryItems = [];
         let h = this.h * 0.66 + 3 * this.s;
         this.inventory.forEach((e: string) => {
-            // let text = this.add.text(this.w * 0.75 + 2 * this.s, h, e)
-            //     .setStyle({ fontSize: `${1.5 * this.s}px` })
-            //     .setWordWrapWidth(this.w * 0.75 + 4 * this.s);
-            // h += text.height + this.s;
-
             let item = new ItemSprite(this, e, this.w * 0.75 + 2 * this.s, h, 'inventory')
             item.itemImg.scale = (item.itemTxt.height / item.itemImg.height)
             this.add.existing(item)
 
-            h += item.height;
+            h += item.itemTxt.height + this.s;
 
             this.inventoryItems.push(item)
         });
@@ -187,6 +189,48 @@ export default abstract class AdventureScene extends Progresser {
                     resolve()
                 })
             })
+        }
+    }
+
+    pathfind(thing: Phaser.GameObjects.Components.Transform, to: Phaser.Types.Math.Vector2Like): Phaser.Tweens.Tween | undefined {
+        let closestPoint = (a: Phaser.Geom.Line, c: Phaser.Types.Math.Vector2Like): Phaser.Math.Vector2 => {
+            let onInfinite = Phaser.Geom.Line.GetNearestPoint(a, c)
+            let length = Phaser.Geom.Line.Length(a)
+
+            let distanceA = a.getPointA().distance(onInfinite)
+            let distanceB = a.getPointB().distance(onInfinite)
+
+            if(Math.abs(distanceA + distanceB - length) < Phaser.Math.EPSILON) {
+                return new Phaser.Math.Vector2(onInfinite)
+            } else if(distanceA > distanceB) {
+                return a.getPointB()
+            } else {
+                return a.getPointA()
+            }
+        }
+
+        type Closest = { distance: number, pathName: string }
+        let closestNow: Closest | undefined = undefined
+        for(let pathName in this.paths.paths) {
+            let path = this.paths.paths[pathName]
+            let segment = new Phaser.Geom.Line(
+                this.paths.locations[path[0]].x,
+                this.paths.locations[path[0]].y,
+                this.paths.locations[path[1]].x,
+                this.paths.locations[path[1]].y
+            )
+            let point = closestPoint(segment, thing)
+            let closeness = { distance: point.distance(thing), pathName: pathName }
+            if(!closestNow || closestNow.distance < closeness.distance) {
+                closestNow = closeness
+            }
+        }
+        if(closestNow != undefined) {
+            // TODO
+            to;
+            return undefined
+        } else {
+            return undefined
         }
     }
 }

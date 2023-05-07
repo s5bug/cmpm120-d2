@@ -1,6 +1,6 @@
 import 'phaser';
 
-import AdventureScene from "../adventure.ts";
+import AdventureScene, { Paths } from "../adventure.ts";
 import ItemSprite from "../item-sprite.ts";
 import debugCode from "../debug-code.ts";
 
@@ -15,7 +15,17 @@ export default class CrowEra extends AdventureScene {
     fishgirl!: ItemSprite
 
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
-        super(config, "Va\'weál", "Era of The Crow\nYear 978");
+        let paths: Paths = {
+            locations: {
+                "left": new Phaser.Math.Vector2(0, 816),
+                "right": new Phaser.Math.Vector2(0, 816),
+            },
+            paths: {
+                "forward": ["left", "right"],
+                "backward": ["right", "left"]
+            }
+        }
+        super(config, "Va\'weál", "Era of The Crow\nYear 978", paths);
     }
 
     setupNextLoader() {
@@ -101,31 +111,37 @@ export default class CrowEra extends AdventureScene {
         )
         this.add.existing(this.fishgirl)
 
-        this.anims.create({
-            key: 'fishgirl-idle',
-            frameRate: 2,
-            frames: this.anims.generateFrameNumbers('fishgirl', { start: 0, end: 1 }),
-            repeat: -1
-        })
-
-        this.anims.create({
-            key: 'fishgirl-right',
-            frameRate: 2,
-            frames: this.anims.generateFrameNumbers('fishgirl', { start: 2, end: 3 }),
-            repeat: -1
-        })
-
-        this.anims.create({
-            key: 'fishgirl-left',
-            frameRate: 2,
-            frames: this.anims.generateFrameNumbers('fishgirl', { start: 4, end: 5 }),
-            repeat: -1,
-        })
-
         this.fishgirl.itemImg.play('fishgirl-idle')
+        this.fishgirl.itemImg.on(Phaser.Input.Events.POINTER_OVER, (ev: PointerEvent) => {
+            ev;
+            this.fishgirl.sparkler.active = !this.fishgirl.sparkler.active
+            if(this.fishgirl.sparkler.active) {
+                this.fishgirl.sparkler.emitParticle(2)
+            } else {
+                this.fishgirl.sparkler.killAll()
+            }
+        })
 
-        this.fishgirl.itemImg.on('pointerover', () => {
-            this.showMessage("It me!")
+        this.input.on(Phaser.Input.Events.POINTER_MOVE, (ev: PointerEvent) => {
+            let dw = this.fishgirl.itemImg.width
+            let fgl = this.fishgirl.x - dw
+            let fgr = this.fishgirl.x + dw
+            if(ev.x < fgl) {
+                if(this.fishgirl.itemImg.anims.getName() != 'fishgirl-left')
+                    this.fishgirl.itemImg.play('fishgirl-left')
+            } else if(ev.x > fgr) {
+                if(this.fishgirl.itemImg.anims.getName() != 'fishgirl-right')
+                    this.fishgirl.itemImg.play('fishgirl-right')
+            } else {
+                if(this.fishgirl.itemImg.anims.getName() != 'fishgirl-idle')
+                    this.fishgirl.itemImg.play('fishgirl-idle')
+            }
+        })
+
+        let mcPathfind: Phaser.Tweens.Tween | undefined = undefined
+        this.input.on(Phaser.Input.Events.POINTER_DOWN, (ev: PointerEvent) => {
+            mcPathfind?.stop()
+            mcPathfind = this.pathfind(this.fishgirl, new Phaser.Geom.Point(ev.x, ev.y))
         })
 
         debugCode("x", this, () => this.gotoScene('dartfrog-era', undefined, true))
