@@ -4,11 +4,11 @@ import items from "./items-list.ts";
 
 export default class ItemSprite extends Phaser.GameObjects.Container {
     itemName: string
-    inventory: boolean
+    textSide: 'right' | 'left' | 'inventory'
     itemImg: Phaser.GameObjects.Sprite
     itemTxt: Phaser.GameObjects.Text
 
-    constructor(scene: Phaser.Scene, itemName: string, x?: number, y?: number, inventory?: boolean) {
+    constructor(scene: Phaser.Scene, itemName: string, x?: number, y?: number, textSide?: 'right' | 'left' | 'inventory') {
         if(!items[itemName]) alert(`Alerta! You have not defined the item ${itemName}!`)
 
         let itemImg = new Phaser.GameObjects.Sprite(
@@ -28,7 +28,7 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
         itemTxt.setOrigin(0, 0.5)
         super(scene, x, y, [itemImg, itemTxt])
         this.itemName = itemName
-        this.inventory = inventory || false
+        this.textSide = textSide || 'right'
         this.itemImg = itemImg
         this.itemTxt = itemTxt
     }
@@ -36,14 +36,18 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
     addedToScene() {
         super.addedToScene();
 
-        if(this.inventory) {
+        if(this.textSide == 'inventory') {
             this.itemImg.setScale(2 * (this.itemTxt.height / this.itemImg.height))
         }
 
-        this.itemTxt.x = ((this.itemImg.width / 2) * this.itemImg.scale) + (this.itemTxt.height / 2)
+        if(this.textSide == 'left') {
+            this.itemTxt.x = (-(this.itemImg.width / 2) * this.itemImg.scale) + (this.itemTxt.height / 2) - (this.itemTxt.width)
+        } else {
+            this.itemTxt.x = ((this.itemImg.width / 2) * this.itemImg.scale) + (this.itemTxt.height / 2)
+        }
         this.itemTxt.y = 0
 
-        if(!this.inventory) {
+        if(this.textSide != 'inventory') {
             this.itemTxt.alpha = 0.0
             this.itemTxt.scale = 0.0
 

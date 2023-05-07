@@ -70,6 +70,15 @@ export default abstract class AdventureScene extends Progresser {
                     this.scale.startFullscreen();
                 }
             });
+
+        if(new URL(window.location.href).searchParams.get("debug") == "true") {
+            let debugText = this.add.text(0, 0, "(?, ?)")
+            debugText.setOrigin(0, 0)
+            debugText.depth = Infinity
+            this.input.on(Phaser.Input.Events.POINTER_MOVE, (ev: PointerEvent) => {
+                debugText.text = `(${ev.x}, ${ev.y})`
+            })
+        }
     }
 
     showMessage(message: string) {
@@ -107,7 +116,7 @@ export default abstract class AdventureScene extends Progresser {
             //     .setWordWrapWidth(this.w * 0.75 + 4 * this.s);
             // h += text.height + this.s;
 
-            let item = new ItemSprite(this, e, this.w * 0.75 + 2 * this.s, h, true)
+            let item = new ItemSprite(this, e, this.w * 0.75 + 2 * this.s, h, 'inventory')
             item.itemImg.scale = (item.itemTxt.height / item.itemImg.height)
             this.add.existing(item)
 

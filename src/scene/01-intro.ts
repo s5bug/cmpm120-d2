@@ -5,6 +5,11 @@ import Progresser from "../progresser.ts";
 import FisjEnterprises from '../assets/fisjenterprises.png';
 import debugCode from "../debug-code.ts";
 
+import CrowEraBackground from '../assets/02-crow-era/background.png';
+import CrowEraSun from '../assets/02-crow-era/sun.png';
+import CrowEraBackLayer from '../assets/02-crow-era/back-layer.png';
+import CrowEraMiddleLayer from '../assets/02-crow-era/middle-layer.png';
+import RiverOfTime from '../assets/02-crow-era/river-of-time.png';
 import FishgirlImage from '../assets/fishgirl.png';
 
 export default class IntroScene extends Progresser {
@@ -21,7 +26,12 @@ export default class IntroScene extends Progresser {
     setupNextLoader() {
         this.load.sceneModule('crow-era', () => import('./02-crow-era.ts'))
 
-        this.load.image('fishgirl', FishgirlImage)
+        this.load.image('crow-era-background', CrowEraBackground)
+        this.load.image('crow-era-sun', CrowEraSun)
+        this.load.image('crow-era-back-layer', CrowEraBackLayer)
+        this.load.image('crow-era-middle-layer', CrowEraMiddleLayer)
+        this.load.image('river-of-time', RiverOfTime)
+        this.load.spritesheet('fishgirl', FishgirlImage, { frameWidth: 64, frameHeight: 128 })
     }
 
     create() {

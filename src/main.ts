@@ -235,6 +235,7 @@ const game = new Phaser.Game({
         width: 1920,
         height: 1080
     },
+    parent: 'app',
     title: "CMPM D2",
     input: {
         keyboard: true,
