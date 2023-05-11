@@ -91,4 +91,18 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
             })
         }
     }
+
+    get sparkle() {
+        return this.sparkler.active
+    }
+
+    set sparkle(active: boolean) {
+        if(this.sparkle && !active) {
+            this.sparkler.active = false
+            this.sparkler.killAll()
+        } else if(!this.sparkle && active) {
+            this.sparkler.active = true
+            this.sparkler.emitParticle(2)
+        }
+    }
 }

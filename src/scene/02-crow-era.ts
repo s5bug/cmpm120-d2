@@ -125,12 +125,7 @@ export default class CrowEra extends AdventureScene {
         this.fishgirl.itemImg.play('fishgirl-idle')
         this.fishgirl.itemImg.on(Phaser.Input.Events.POINTER_OVER, (ev: PointerEvent) => {
             ev;
-            this.fishgirl.sparkler.active = !this.fishgirl.sparkler.active
-            if(this.fishgirl.sparkler.active) {
-                this.fishgirl.sparkler.emitParticle(2)
-            } else {
-                this.fishgirl.sparkler.killAll()
-            }
+            this.fishgirl.sparkle = !this.fishgirl.sparkle
         })
 
         this.input.on(Phaser.Input.Events.POINTER_MOVE, (ev: PointerEvent) => {
