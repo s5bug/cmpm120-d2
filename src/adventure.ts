@@ -2,7 +2,6 @@ import 'phaser';
 import ItemSprite from "./item-sprite.ts";
 import Progresser from "./progresser.ts";
 import PathGraph from "./path-graph.ts";
-import Vector2 = Phaser.Math.Vector2;
 
 export type Paths =  {
     locations: Record<string, Phaser.Math.Vector2>,
@@ -238,7 +237,7 @@ export default abstract class AdventureScene extends Progresser {
             }
         }
 
-        let thingPosition = new Vector2(
+        let thingPosition = new Phaser.Math.Vector2(
             thing.x,
             thing.y
         )
