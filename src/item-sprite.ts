@@ -3,6 +3,15 @@ import 'phaser';
 import items from "./items-list.ts";
 import ParticleEmitter = Phaser.GameObjects.Particles.ParticleEmitter;
 
+export type ItemProperites = {
+    itemName: string
+    x?: number
+    y?: number
+    originX?: number,
+    originY?: number,
+    textSide?: 'right' | 'left' | 'inventory'
+}
+
 export default class ItemSprite extends Phaser.GameObjects.Container {
     itemName: string
     textSide: 'right' | 'left' | 'inventory'
@@ -10,21 +19,21 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
     itemTxt: Phaser.GameObjects.Text
     sparkler: Phaser.GameObjects.Particles.ParticleEmitter
 
-    constructor(scene: Phaser.Scene, itemName: string, x?: number, y?: number, textSide?: 'right' | 'left' | 'inventory') {
-        if(!items[itemName]) alert(`Alerta! You have not defined the item ${itemName}!`)
+    constructor(scene: Phaser.Scene, props: ItemProperites) {
+        if(!items[props.itemName]) alert(`Alerta! You have not defined the item ${props.itemName}!`)
 
         let itemImg = new Phaser.GameObjects.Sprite(
             scene,
             0,
             0,
-            items[itemName].sprite
+            items[props.itemName].sprite
         )
-        itemImg.setOrigin(0.5, 0.5)
+        itemImg.setOrigin(props.originX || 0.5, props.originY)
         let itemTxt = new Phaser.GameObjects.Text(
             scene,
             0,
             0,
-            items[itemName].name,
+            items[props.itemName].name,
             {}
         )
         itemTxt.setOrigin(0, 0.5)
@@ -45,9 +54,9 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
             anim: 'sparkle-sparkle',
         })
         sparkler.active = false
-        super(scene, x, y, [itemImg, itemTxt, sparkler])
-        this.itemName = itemName
-        this.textSide = textSide || 'right'
+        super(scene, props.x, props.y, [itemImg, itemTxt, sparkler])
+        this.itemName = props.itemName
+        this.textSide = props.textSide || 'right'
         this.itemImg = itemImg
         this.itemTxt = itemTxt
         this.sparkler = sparkler
@@ -65,7 +74,7 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
         } else {
             this.itemTxt.x = ((this.itemImg.width / 2) * this.itemImg.scale) + (this.itemTxt.height / 2)
         }
-        this.itemTxt.y = 0
+        this.itemTxt.y = this.itemImg.height * (0.5 - this.itemImg.originY)
 
         if(this.textSide != 'inventory') {
             this.itemTxt.alpha = 0.0

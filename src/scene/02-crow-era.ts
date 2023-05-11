@@ -18,11 +18,10 @@ export default class CrowEra extends AdventureScene {
         let paths: Paths = {
             locations: {
                 "left": new Phaser.Math.Vector2(0, 816),
-                "right": new Phaser.Math.Vector2(0, 816),
+                "right": new Phaser.Math.Vector2(1440, 816),
             },
             paths: {
-                "forward": ["left", "right"],
-                "backward": ["right", "left"]
+                "ground": ["left", "right"]
             }
         }
         super(config, "Va\'weál", "Era of The Crow\nYear 978", paths);
@@ -67,10 +66,12 @@ export default class CrowEra extends AdventureScene {
 
         this.riverOfTime = new ItemSprite(
             this,
-            'river-of-time',
-            1325,
-            640,
-            'left',
+            {
+                itemName: 'river-of-time',
+                x: 1325,
+                y: 640,
+                textSide: 'left'
+            }
         )
         this.add.existing(this.riverOfTime)
 
@@ -87,17 +88,23 @@ export default class CrowEra extends AdventureScene {
 
         this.soccerBall = new ItemSprite(
             this,
-            'soccer-ball',
-            (this.w * 0.75) / 2,
-            this.h * 3 / 4,
+            {
+                itemName: 'soccer-ball',
+                x: (this.w * 0.75) / 2,
+                y: this.h * 3 / 4
+            }
         )
         this.add.existing(this.soccerBall)
 
         this.guy = new ItemSprite(
             this,
-            'guy',
-            0,
-            this.h * 3 / 4
+            {
+                itemName: 'guy',
+                x: 0,
+                y: standLine,
+                originX: 0.5,
+                originY: 1.0
+            }
         )
         this.guy.x =
             ((this.w * 0.75) / 2) - (this.soccerBall.itemImg.width + this.guy.itemImg.width)
@@ -105,9 +112,13 @@ export default class CrowEra extends AdventureScene {
 
         this.fishgirl = new ItemSprite(
             this,
-            'fishgirl',
-            176,
-            standLine - (128 / 2)
+            {
+                itemName: 'fishgirl',
+                x: 176,
+                y: standLine,
+                originX: 0.5,
+                originY: 1.0
+            }
         )
         this.add.existing(this.fishgirl)
 
@@ -138,10 +149,10 @@ export default class CrowEra extends AdventureScene {
             }
         })
 
-        let mcPathfind: Phaser.Tweens.Tween | undefined = undefined
+        let mcPathfind: Phaser.Tweens.TweenChain | undefined = undefined
         this.input.on(Phaser.Input.Events.POINTER_DOWN, (ev: PointerEvent) => {
             mcPathfind?.stop()
-            mcPathfind = this.pathfind(this.fishgirl, new Phaser.Geom.Point(ev.x, ev.y))
+            mcPathfind = this.pathfind(this.fishgirl, new Phaser.Geom.Point(ev.x, ev.y), 1)
         })
 
         debugCode("x", this, () => this.gotoScene('dartfrog-era', undefined, true))

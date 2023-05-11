@@ -1,6 +1,8 @@
 import 'phaser';
 import ItemSprite from "./item-sprite.ts";
 import Progresser from "./progresser.ts";
+import PathGraph from "./path-graph.ts";
+import Vector2 = Phaser.Math.Vector2;
 
 export type Paths =  {
     locations: Record<string, Phaser.Math.Vector2>,
@@ -10,7 +12,7 @@ export type Paths =  {
 export default abstract class AdventureScene extends Progresser {
     name: string
     subtitle: string | undefined
-    paths: Paths
+    paths: PathGraph<Phaser.Math.Vector2, Phaser.Geom.Line>
     inventory!: string[]
     transitionDuration!: number
     w!: number
@@ -21,14 +23,33 @@ export default abstract class AdventureScene extends Progresser {
     inventoryItems!: ItemSprite[]
 
     init(data: { inventory?: string[] }) {
-        this.inventory = data.inventory || [];
+        this.inventory = data.inventory || []
     }
 
     protected constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string, paths?: Paths) {
-        super(config);
-        this.name = name;
-        this.subtitle = subtitle;
-        this.paths = paths || { locations: {}, paths: {} };
+        super(config)
+        this.name = name
+        this.subtitle = subtitle
+        let nodes: Record<string, Phaser.Math.Vector2> = {}
+        let edges: Record<string, [string, string, Phaser.Geom.Line]> = {}
+
+        if(paths) {
+            for(let location in paths.locations) {
+                nodes[location] = paths.locations[location]
+            }
+            for(let path in paths.paths) {
+                let [a, b] = paths.paths[path]
+                let line = new Phaser.Geom.Line(
+                    paths.locations[a].x,
+                    paths.locations[a].y,
+                    paths.locations[b].x,
+                    paths.locations[b].y
+                )
+                edges[path] = [a, b, line]
+            }
+        }
+
+        this.paths = new PathGraph({ nodes, edges })
     }
 
     create() {
@@ -118,7 +139,15 @@ export default abstract class AdventureScene extends Progresser {
         this.inventoryItems = [];
         let h = this.h * 0.66 + 3 * this.s;
         this.inventory.forEach((e: string) => {
-            let item = new ItemSprite(this, e, this.w * 0.75 + 2 * this.s, h, 'inventory')
+            let item = new ItemSprite(
+                this,
+                {
+                    itemName: e,
+                    x: this.w * 0.75 + 2 * this.s,
+                    y: h,
+                    textSide: 'inventory'
+                }
+            )
             item.itemImg.scale = (item.itemTxt.height / item.itemImg.height)
             this.add.existing(item)
 
@@ -192,7 +221,7 @@ export default abstract class AdventureScene extends Progresser {
         }
     }
 
-    pathfind(thing: Phaser.GameObjects.Components.Transform, to: Phaser.Types.Math.Vector2Like): Phaser.Tweens.Tween | undefined {
+    pathfind(thing: Phaser.GameObjects.Components.Transform, to: Phaser.Types.Math.Vector2Like, speed: number): Phaser.Tweens.TweenChain | undefined {
         let closestPoint = (a: Phaser.Geom.Line, c: Phaser.Types.Math.Vector2Like): Phaser.Math.Vector2 => {
             let onInfinite = Phaser.Geom.Line.GetNearestPoint(a, c)
             let length = Phaser.Geom.Line.Length(a)
@@ -209,28 +238,85 @@ export default abstract class AdventureScene extends Progresser {
             }
         }
 
-        type Closest = { distance: number, pathName: string }
-        let closestNow: Closest | undefined = undefined
-        for(let pathName in this.paths.paths) {
-            let path = this.paths.paths[pathName]
-            let segment = new Phaser.Geom.Line(
-                this.paths.locations[path[0]].x,
-                this.paths.locations[path[0]].y,
-                this.paths.locations[path[1]].x,
-                this.paths.locations[path[1]].y
-            )
-            let point = closestPoint(segment, thing)
-            let closeness = { distance: point.distance(thing), pathName: pathName }
-            if(!closestNow || closestNow.distance < closeness.distance) {
-                closestNow = closeness
-            }
-        }
-        if(closestNow != undefined) {
-            // TODO
-            to;
+        let thingPosition = new Vector2(
+            thing.x,
+            thing.y
+        )
+
+        let targetEdge = this.paths.minEdgeBy(
+            e => closestPoint(this.paths.edges[e], to).distance(to)
+        )
+        let sourceEdge = this.paths.minEdgeBy(
+            e => closestPoint(this.paths.edges[e], thingPosition).distance(thingPosition)
+        )
+
+        if (!targetEdge || !sourceEdge) {
             return undefined
+        }
+
+        let sourcePoint = closestPoint(this.paths.edges[sourceEdge], thingPosition)
+        let targetPoint = closestPoint(this.paths.edges[targetEdge], to)
+
+        let tweenVertices: Phaser.Math.Vector2[]
+
+        if (targetEdge == sourceEdge) {
+            tweenVertices = [sourcePoint, targetPoint]
         } else {
-            return undefined
+            let targetVertices = this.paths.adjacencies[targetEdge]
+            let sourceVertices = this.paths.adjacencies[sourceEdge]
+
+            let minimum: { weight: number, vertices: string[] } | undefined
+
+            for (let targetVertex of targetVertices) {
+                let targetWeight = this.paths.nodes[targetVertex].distance(to)
+                for (let sourceVertex of sourceVertices) {
+                    let sourceWeight = this.paths.nodes[sourceVertex].distance(thingPosition)
+
+                    let addedWeight = targetWeight + sourceWeight
+
+                    let vertexPathResult =
+                        this.paths.bfs(
+                            sourceVertex,
+                            targetVertex,
+                            e => Phaser.Geom.Line.Length(this.paths.edges[e])
+                        )
+
+                    if (vertexPathResult) {
+                        vertexPathResult.weight += addedWeight
+                        if (minimum == undefined || vertexPathResult.weight < minimum.weight) {
+                            minimum = vertexPathResult
+                        }
+                    }
+                }
+            }
+
+            if(!minimum) return undefined
+
+            tweenVertices =
+                [sourcePoint].concat(minimum.vertices.map(n => this.paths.nodes[n])).concat([targetPoint])
         }
+
+        let backToPath = {
+            x: sourcePoint.x,
+            y: sourcePoint.y,
+            duration: (thingPosition.distance(sourcePoint)) / speed
+        }
+
+        let tweens = [backToPath]
+
+        for(let i = 0; i < tweenVertices.length - 1; i++) {
+            let here = tweenVertices[i]
+            let there = tweenVertices[i + 1]
+            tweens.push({
+                x: there.x,
+                y: there.y,
+                duration: (here.distance(there)) / speed
+            })
+        }
+
+        return this.tweens.chain({
+            targets: thing,
+            tweens: tweens
+        })
     }
 }
