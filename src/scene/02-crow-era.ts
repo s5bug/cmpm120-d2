@@ -17,8 +17,8 @@ export default class CrowEra extends AdventureScene {
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
         let paths: Paths = {
             locations: {
-                "left": new Phaser.Math.Vector2(0, 816),
-                "right": new Phaser.Math.Vector2(1440, 816),
+                "left": new Phaser.Math.Vector2(0, 820),
+                "right": new Phaser.Math.Vector2(1440, 820),
             },
             paths: {
                 "ground": ["left", "right"]
