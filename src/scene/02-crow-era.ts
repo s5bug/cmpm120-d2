@@ -1,10 +1,91 @@
 import 'phaser';
 
-import AdventureScene, { Paths } from "../adventure.ts";
+import { Paths } from "../adventure.ts";
 import ItemSprite from "../item-sprite.ts";
 import debugCode from "../debug-code.ts";
+import {AdventureStory} from "../adventure-story.ts";
+import FishgirlScene from "../fishgirl-scene.ts";
 
-export default class CrowEra extends AdventureScene {
+const tutorialState = {
+    soccerballClick(scene: CrowEra) {
+        scene.inCutscene = true
+
+        scene.soccerBall.sparkle = false
+        let rightOfSoccerBall = new Phaser.Math.Vector2(
+            scene.soccerBall.x + scene.soccerBall.itemImg.width,
+            scene.soccerBall.y
+        )
+        scene.pathfindFishgirl(rightOfSoccerBall, true)
+        scene.fishgirlPathfinder!.on(Phaser.Tweens.Events.TWEEN_COMPLETE, () => {
+            scene.soccerBall.destroy()
+            scene.gainItem('soccer-ball')
+            scene.fishgirl.itemImg.play('fishgirl-left')
+            scene.gotoState("guySurprisedCutscene")
+        })
+    },
+    setup(scene: CrowEra) {
+        scene.soccerBall.sparkle = true
+        scene.soccerBall.itemImg.once(Phaser.Input.Events.POINTER_DOWN, () => this.soccerballClick(scene))
+    },
+    teardown(_scene: CrowEra) {
+
+    }
+}
+
+const guySurprisedCutscene = {
+    setup(scene: CrowEra) {
+        scene.tweens.chain({
+            targets: scene.guy,
+            tweens: [{
+                y: "-=16",
+                yoyo: true,
+                duration: 50,
+                repeat: 6,
+                onStart: () => {
+                    scene.showMessage(
+                        "Hey, that's my soccer ball! I thought I was going to be the only one here, so I brought it to pass the time.",
+                        3000
+                    )
+                },
+                completeDelay: 4000
+            }, {
+                y: "-=16",
+                yoyo: true,
+                duration: 50,
+                repeat: 6,
+                onStart: () => {
+                    scene.showMessage(
+                        "You wouldn't happen to be here on a journey to the past, would you?",
+                        3000
+                    )
+                },
+                onComplete: () => scene.gotoState("toTheRiver")
+            }],
+        })
+    },
+    teardown(scene: CrowEra) {
+        scene.inCutscene = false
+    }
+}
+
+const toTheRiver = {
+    riverOfTimeClick(scene: CrowEra) {
+        scene.inCutscene = true
+
+        scene.riverOfTime.sparkle = false
+        scene.pathfindFishgirl(scene.riverOfTime, true)
+        scene.fishgirlPathfinder!.on(Phaser.Tweens.Events.TWEEN_COMPLETE, () => {
+            scene.gotoScene('dartfrog-era')
+        })
+    },
+    setup(scene: CrowEra) {
+        scene.riverOfTime.sparkle = true
+        scene.riverOfTime.itemImg.once(Phaser.Input.Events.POINTER_DOWN, () => this.riverOfTimeClick(scene))
+    },
+    teardown(_scene: CrowEra) { throw new Error("unreachable"); }
+}
+
+export default class CrowEra extends FishgirlScene {
     background!: Phaser.GameObjects.Sprite
     sun!: Phaser.GameObjects.Sprite
     backLayer!: Phaser.GameObjects.Sprite
@@ -12,7 +93,6 @@ export default class CrowEra extends AdventureScene {
     soccerBall!: ItemSprite
     guy!: ItemSprite
     riverOfTime!: ItemSprite
-    fishgirl!: ItemSprite
 
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
         let paths: Paths = {
@@ -25,6 +105,16 @@ export default class CrowEra extends AdventureScene {
             }
         }
         super(config, "Va\'weál", "Era of The Crow\nYear 978", paths);
+    }
+
+    get story(): AdventureStory<this> {
+        return {
+            states: {
+                tutorialState,
+                guySurprisedCutscene,
+                toTheRiver
+            }
+        };
     }
 
     setupNextLoader() {
@@ -75,10 +165,6 @@ export default class CrowEra extends AdventureScene {
         )
         this.add.existing(this.riverOfTime)
 
-        this.riverOfTime.itemImg.on('pointerover', () => {
-            this.showMessage("A great flowing river. It has been said to send those who wish into the future.")
-        })
-
         this.middleLayer = this.add.sprite(
             0,
             16,
@@ -110,45 +196,8 @@ export default class CrowEra extends AdventureScene {
             ((this.w * 0.75) / 2) - (this.soccerBall.itemImg.width + this.guy.itemImg.width)
         this.add.existing(this.guy)
 
-        this.fishgirl = new ItemSprite(
-            this,
-            {
-                itemName: 'fishgirl',
-                x: 176,
-                y: standLine,
-                originX: 0.5,
-                originY: 1.0
-            }
-        )
-        this.add.existing(this.fishgirl)
-
-        this.fishgirl.itemImg.play('fishgirl-idle')
-        this.fishgirl.itemImg.on(Phaser.Input.Events.POINTER_OVER, (ev: PointerEvent) => {
-            ev;
-            this.fishgirl.sparkle = !this.fishgirl.sparkle
-        })
-
-        this.input.on(Phaser.Input.Events.POINTER_MOVE, (ev: PointerEvent) => {
-            let dw = this.fishgirl.itemImg.width
-            let fgl = this.fishgirl.x - dw
-            let fgr = this.fishgirl.x + dw
-            if(ev.x < fgl) {
-                if(this.fishgirl.itemImg.anims.getName() != 'fishgirl-left')
-                    this.fishgirl.itemImg.play('fishgirl-left')
-            } else if(ev.x > fgr) {
-                if(this.fishgirl.itemImg.anims.getName() != 'fishgirl-right')
-                    this.fishgirl.itemImg.play('fishgirl-right')
-            } else {
-                if(this.fishgirl.itemImg.anims.getName() != 'fishgirl-idle')
-                    this.fishgirl.itemImg.play('fishgirl-idle')
-            }
-        })
-
-        let mcPathfind: Phaser.Tweens.TweenChain | undefined = undefined
-        this.input.on(Phaser.Input.Events.POINTER_DOWN, (ev: PointerEvent) => {
-            mcPathfind?.stop()
-            mcPathfind = this.pathfind(this.fishgirl, new Phaser.Geom.Point(ev.x, ev.y), 1)
-        })
+        this.createFishgirl(176, standLine)
+        this.gotoState("tutorialState")
 
         debugCode("x", this, () => this.gotoScene('dartfrog-era', undefined, true))
     }

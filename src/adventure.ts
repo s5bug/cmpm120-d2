@@ -2,6 +2,7 @@ import 'phaser';
 import ItemSprite from "./item-sprite.ts";
 import Progresser from "./progresser.ts";
 import PathGraph from "./path-graph.ts";
+import {AdventureState, AdventureStory} from "./adventure-story.ts";
 
 export type Paths =  {
     locations: Record<string, Phaser.Math.Vector2>,
@@ -12,6 +13,7 @@ export default abstract class AdventureScene extends Progresser {
     name: string
     subtitle: string | undefined
     paths: PathGraph<Phaser.Math.Vector2, Phaser.Geom.Line>
+    adventureState: AdventureState<this> | undefined
     inventory!: string[]
     transitionDuration!: number
     w!: number
@@ -50,6 +52,8 @@ export default abstract class AdventureScene extends Progresser {
 
         this.paths = new PathGraph({ nodes, edges })
     }
+
+    abstract get story(): AdventureStory<this>
 
     create() {
         super.create()
@@ -108,13 +112,17 @@ export default abstract class AdventureScene extends Progresser {
         }
     }
 
-    showMessage(message: string) {
+    private messageTween: Phaser.Tweens.Tween | undefined
+    showMessage(message: string, fadeDelay: number = 0) {
         this.messageBox.setText(message);
-        this.tweens.add({
+        this.messageTween?.stop()
+        this.messageBox.alpha = 1
+        this.messageTween = this.tweens.add({
             targets: this.messageBox,
             alpha: { from: 1, to: 0 },
             easing: 'Quintic.in',
-            duration: 4 * this.transitionDuration
+            duration: 4 * this.transitionDuration,
+            delay: fadeDelay
         });
     }
 
@@ -200,6 +208,13 @@ export default abstract class AdventureScene extends Progresser {
             this.inventory = this.inventory.filter((e) => e != itemName);
             this.updateInventory();
         });
+    }
+
+    gotoState(key: string) {
+        this.adventureState?.teardown(this)
+        if(!this.story.states[key]) alert(`ALERTA! You forgot to define a story state ${key} for scene ${this.scene.key}`)
+        this.adventureState = this.story.states[key]
+        this.adventureState.setup(this)
     }
 
     gotoScene(key: string, data?: object | undefined, fast?: boolean) {
