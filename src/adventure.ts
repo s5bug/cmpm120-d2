@@ -109,6 +109,23 @@ export default abstract class AdventureScene extends Progresser {
             this.input.on(Phaser.Input.Events.POINTER_MOVE, (ev: PointerEvent) => {
                 debugText.text = `(${ev.x}, ${ev.y})`
             })
+
+            this.add.graphics().setDepth(Infinity)
+            let lineObjs = []
+            for (let pathName in this.paths.edges) {
+                let path = this.paths.edges[pathName]
+                let a = path.getPointA()
+                let b = path.getPointB()
+                lineObjs.push(this.add.line(0, 0, a.x, a.y, b.x, b.y).setOrigin(0, 0))
+            }
+
+            for (let i = 0; i < lineObjs.length; i++) {
+                let pct = lineObjs.length == 1 ? 1.0 : i / (lineObjs.length - 1)
+                let grad = Math.floor(255.0 * pct)
+                let col = (grad << 16) | (0 << 8) | (grad << 0)
+                lineObjs[i].setStrokeStyle(2, col, 1)
+                lineObjs[i].setDepth(Infinity)
+            }
         }
     }
 

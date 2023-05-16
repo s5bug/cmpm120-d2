@@ -78,9 +78,9 @@ export default class PathGraph<V, E> {
             for(let edge in spoke) {
                 let pathWeight = process.weight + weight(edge)
 
-                let extantWeight = seen[spoke[edge]] || Infinity
+                let extantWeight = seen[spoke[edge]]
 
-                if(extantWeight < pathWeight) {
+                if(extantWeight == undefined || pathWeight < extantWeight) {
                     let nextPath: Path = { weight: pathWeight, vertices: process.vertices.concat([spoke[edge]]) }
                     queue.push(nextPath)
                 }

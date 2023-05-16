@@ -3,10 +3,20 @@ import 'phaser';
 import debugCode from "../debug-code.ts";
 import FishgirlScene from "../fishgirl-scene.ts";
 import {AdventureStory} from "../adventure-story.ts";
+import {Paths} from "../adventure.ts";
 
 export default class Restaurant extends FishgirlScene {
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
-        super(config, "Co'n Co'yoli's", "Authentic Acuerlan cuisine\n\nVa'weál\nDartfrog 5762");
+        let paths: Paths = {
+            locations: {
+                'left': new Phaser.Math.Vector2(0, 800),
+                'right': new Phaser.Math.Vector2(1215, 800)
+            },
+            paths: {
+                'floor': ['left', 'right']
+            }
+        }
+        super(config, "Co'n Co'yoli's", "Authentic Acuerlan cuisine\n\nVa'weál\nDartfrog 5762", paths);
     }
 
     get story(): AdventureStory<this> {
