@@ -4,8 +4,11 @@ import debugCode from "../debug-code.ts";
 import {AdventureStory} from "../adventure-story.ts";
 import FishgirlScene from "../fishgirl-scene.ts";
 import {Paths} from "../adventure.ts";
+import ItemSprite from "../item-sprite.ts";
 
 export default class LectureHall extends FishgirlScene {
+    personageB!: ItemSprite
+
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
         let paths: Paths = {
             locations: {
@@ -43,6 +46,16 @@ export default class LectureHall extends FishgirlScene {
 
     create() {
         super.create()
+
+        this.personageB = new ItemSprite(
+            this,
+            {
+                itemName: 'personage-b',
+                x: 1150,
+                y: 760,
+            }
+        )
+        this.add.existing(this.personageB)
 
         this.createFishgirl(this.w / 2, this.h / 2)
 

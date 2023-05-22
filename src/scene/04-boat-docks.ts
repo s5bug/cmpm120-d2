@@ -4,8 +4,33 @@ import debugCode from "../debug-code.ts";
 import FishgirlScene from "../fishgirl-scene.ts";
 import {AdventureStory} from "../adventure-story.ts";
 import {Paths} from "../adventure.ts";
+import ItemSprite from "../item-sprite.ts";
+
+let initialNotInvestigated = {
+    setup(scene: BoatDocks) {
+        scene.conCoyolis.sparkle = true
+        scene.lectureHall.sparkle = true
+    },
+    teardown(_scene: BoatDocks) {
+
+    }
+}
+
+let initialInvestigated = {
+    setup(scene: BoatDocks) {
+        scene.conCoyolis.sparkle = true
+        scene.lectureHall.sparkle = true
+    },
+    teardown(_scene: BoatDocks) {
+
+    }
+}
 
 export default class BoatDocks extends FishgirlScene {
+    tunnelInvestigated!: boolean
+    conCoyolis!: ItemSprite
+    lectureHall!: ItemSprite
+
     constructor(config: Phaser.Types.Scenes.SettingsConfig) {
         let paths: Paths = {
             locations: {
@@ -25,9 +50,17 @@ export default class BoatDocks extends FishgirlScene {
         super(config, "Boat Docks", "Va'weál\nDartfrog 5762", paths);
     }
 
+    init(data: { inventory?: string[], tunnelInvestigated?: boolean }) {
+        super.init(data);
+        this.tunnelInvestigated = data.tunnelInvestigated || false;
+    }
+
     get story(): AdventureStory<this> {
         return {
-            states: {}
+            states: {
+                initialNotInvestigated,
+                initialInvestigated,
+            }
         };
     }
 
@@ -39,9 +72,30 @@ export default class BoatDocks extends FishgirlScene {
     create() {
         super.create()
 
-        this.createFishgirl(this.w / 2, this.h / 2)
+        this.conCoyolis = new ItemSprite(
+            this,
+            {
+                itemName: 'con-coyolis',
+                x: 225,
+                y: 620,
+            }
+        )
+        this.add.existing(this.conCoyolis)
 
-        debugCode("x", this, () => this.gotoScene('restaurant', undefined, true))
+        this.lectureHall = new ItemSprite(
+            this,
+            {
+                itemName: 'lecture-hall',
+                x: 1215,
+                y: 620,
+            }
+        )
+        this.add.existing(this.lectureHall)
+
+        this.createFishgirl(this.w / 2, this.h / 2)
+        this.gotoState(this.tunnelInvestigated ? 'initialInvestigated' : 'initialNotInvestigated')
+
+        debugCode("x", this, () => this.gotoScene('restaurant', { tunnelInvestigated: this.tunnelInvestigated }, true))
         debugCode("c", this, () => this.gotoScene('lecture-hall', undefined, true))
     }
 }

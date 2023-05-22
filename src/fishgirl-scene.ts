@@ -5,6 +5,10 @@ export default abstract class FishgirlScene extends AdventureScene {
     inCutscene: boolean
     fishgirl!: ItemSprite
     fishgirlPathfinder: Phaser.Tweens.TweenChain | undefined
+    static FISHGIRL_SPEECH_COLOR: string = "#9aebe4"
+    static FISHGIRL_SPEED: number = 0.75;
+    static GUY_SPEECH_COLOR: string = "#eeeeaa"
+    static GUY_SPEED: number = 0.7;
 
     protected constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string, paths?: Paths) {
         super(config, name, subtitle, paths);
@@ -51,7 +55,7 @@ export default abstract class FishgirlScene extends AdventureScene {
     pathfindFishgirl(to: Phaser.Types.Math.Vector2Like, asCutscene: boolean = false): void {
         if(asCutscene || !this.inCutscene) {
             this.fishgirlPathfinder?.stop()
-            this.fishgirlPathfinder = this.pathfind(this.fishgirl, to, 0.75)
+            this.fishgirlPathfinder = this.pathfind(this.fishgirl, to, FishgirlScene.FISHGIRL_SPEED)
         }
     }
 }

@@ -130,7 +130,9 @@ export default abstract class AdventureScene extends Progresser {
     }
 
     private messageTween: Phaser.Tweens.Tween | undefined
-    showMessage(message: string, fadeDelay: number = 0) {
+    showMessage(message: string, fadeDelay: number = 0, color?: string) {
+        if(color) this.messageBox.setColor(color);
+        else this.messageBox.setColor('#eea');
         this.messageBox.setText(message);
         this.messageTween?.stop()
         this.messageBox.alpha = 1
@@ -350,4 +352,33 @@ export default abstract class AdventureScene extends Progresser {
             tweens: tweens
         })
     }
+
+    speechTween(duration: number, content: string, color?: string, options?: SpeechTweenOptions): Omit<Phaser.Types.Tweens.TweenBuilderConfig, "targets"> {
+        let extras: { [key: string]: any }  = {}
+        if(options?.onComplete) {
+            extras.onComplete = options.onComplete
+        }
+        if(options?.delayEnding == undefined || options.delayEnding) {
+            extras.completeDelay = duration
+        }
+        return {
+            y: "-=16",
+            yoyo: true,
+            duration: 50,
+            repeat: 6,
+            onStart: () => {
+                this.showMessage(
+                    content,
+                    duration - 1000,
+                    color
+                )
+            },
+            ...extras
+        }
+    }
+}
+
+type SpeechTweenOptions = {
+    delayEnding?: boolean,
+    onComplete?: Phaser.Types.Tweens.TweenOnCompleteCallback
 }

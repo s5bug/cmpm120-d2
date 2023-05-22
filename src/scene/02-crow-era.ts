@@ -20,7 +20,7 @@ const tutorialState = {
             scene.soccerBall.destroy()
             scene.gainItem('soccer-ball')
             scene.fishgirl.itemImg.play('fishgirl-left')
-            scene.gotoState("guySurprisedCutscene")
+            scene.gotoState('guySurprisedCutscene')
         })
     },
     setup(scene: CrowEra) {
@@ -36,31 +36,22 @@ const guySurprisedCutscene = {
     setup(scene: CrowEra) {
         scene.tweens.chain({
             targets: scene.guy,
-            tweens: [{
-                y: "-=16",
-                yoyo: true,
-                duration: 50,
-                repeat: 6,
-                onStart: () => {
-                    scene.showMessage(
-                        "Hey, that's my soccer ball! I thought I was going to be the only one here, so I brought it to pass the time.",
-                        3000
-                    )
-                },
-                completeDelay: 4000
-            }, {
-                y: "-=16",
-                yoyo: true,
-                duration: 50,
-                repeat: 6,
-                onStart: () => {
-                    scene.showMessage(
-                        "You wouldn't happen to be here on a journey to the past, would you?",
-                        3000
-                    )
-                },
-                onComplete: () => scene.gotoState("toTheRiver")
-            }],
+            tweens: [
+                scene.speechTween(
+                    4000,
+                    "Hey, that's my soccer ball! I thought I was going to be the only one here, so I brought it to pass the time.",
+                    FishgirlScene.GUY_SPEECH_COLOR
+                ),
+                scene.speechTween(
+                    4000,
+                    "You wouldn't happen to be here on a journey to the past, would you?",
+                    FishgirlScene.GUY_SPEECH_COLOR,
+                    {
+                        delayEnding: false,
+                        onComplete: () => scene.gotoState('toTheRiver')
+                    }
+                )
+            ],
         })
     },
     teardown(scene: CrowEra) {

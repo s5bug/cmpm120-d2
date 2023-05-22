@@ -8,8 +8,18 @@ import {Paths} from "../adventure.ts";
 
 let explore = {
     guyClick(scene: DartfrogEra) {
-        scene.guy.sparkle = false
         scene.inCutscene = true
+
+        scene.guy.sparkle = false
+        let rightOfGuy = new Phaser.Math.Vector2(
+            scene.guy.x + 70,
+            scene.guy.y
+        )
+        scene.pathfindFishgirl(rightOfGuy, true)
+        scene.fishgirlPathfinder!.on(Phaser.Tweens.Events.TWEEN_COMPLETE, () => {
+            scene.fishgirl.itemImg.play('fishgirl-left')
+            scene.gotoState('firstDialogue')
+        })
     },
     setup(scene: DartfrogEra) {
         scene.guy.sparkle = true
@@ -21,8 +31,25 @@ let explore = {
 }
 
 let firstDialogue = {
-    setup(_scene: DartfrogEra) {
-
+    setup(scene: DartfrogEra) {
+        scene.tweens.chain({
+            targets: scene.guy,
+            tweens: [
+                scene.speechTween(
+                    3000,
+                    "Wow, we actually made it to the past!",
+                    FishgirlScene.GUY_SPEECH_COLOR
+                ),
+                scene.speechTween(
+                    4000,
+                    "Look at all the water here! This must have been what it was like before the world was flooded by Leviathan...",
+                    FishgirlScene.GUY_SPEECH_COLOR,
+                    {
+                        onComplete: () => scene.gotoState('secondDialogue')
+                    }
+                )
+            ],
+        })
     },
     teardown(_scene: DartfrogEra) {
 
@@ -30,21 +57,50 @@ let firstDialogue = {
 }
 
 let secondDialogue = {
-    setup(_scene: DartfrogEra) {
-
+    setup(scene: DartfrogEra) {
+        scene.pathfind(scene.guy, scene.docks, FishgirlScene.GUY_SPEED)!.on(Phaser.Tweens.Events.TWEEN_COMPLETE, () => {
+            scene.tweens.chain({
+                targets: scene.guy,
+                tweens: [
+                    scene.speechTween(
+                        4000,
+                        "It looks like there's a town across these docks.",
+                        FishgirlScene.GUY_SPEECH_COLOR
+                    ),
+                    scene.speechTween(
+                        4000,
+                        "Let's go!",
+                        FishgirlScene.GUY_SPEECH_COLOR,
+                        {
+                            delayEnding: false,
+                            onComplete: () => scene.gotoState('readyToBoatDocks')
+                        }
+                    )
+                ],
+            })
+        })
     },
     teardown(scene: DartfrogEra) {
+        scene.inCutscene = false
         scene.guy.destroy()
     }
 }
 
 let readyToBoatDocks = {
-    setup(_scene: DartfrogEra) {
+    docksClick(scene: DartfrogEra) {
+        scene.inCutscene = true
 
+        scene.docks.sparkle = false
+        scene.pathfindFishgirl(scene.docks, true)
+        scene.fishgirlPathfinder!.on(Phaser.Tweens.Events.TWEEN_COMPLETE, () => {
+            scene.gotoScene('boat-docks')
+        })
     },
-    teardown(_scene: DartfrogEra) {
-
-    }
+    setup(scene: DartfrogEra) {
+        scene.docks.sparkle = true
+        scene.docks.itemImg.once(Phaser.Input.Events.POINTER_DOWN, () => this.docksClick(scene))
+    },
+    teardown(_scene: DartfrogEra) { throw new Error("unreachable") }
 }
 
 export default class DartfrogEra extends FishgirlScene {
