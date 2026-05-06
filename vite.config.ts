@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '')
     let basePath;
     if(env["GITHUB_ACTIONS"] === "true") {
