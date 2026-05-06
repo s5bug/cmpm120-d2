@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 
 import items from "./items-list.ts";
 import ParticleEmitter = Phaser.GameObjects.Particles.ParticleEmitter;
@@ -37,16 +37,17 @@ export default class ItemSprite extends Phaser.GameObjects.Container {
             {}
         )
         itemTxt.setOrigin(0, 0.5)
-        // @ts-ignore
-        // Why the types are wrong I have no clue
+
         let sparkler = new ParticleEmitter(scene, 0, 0, 'sparkle', {
             active: true,
             frequency: 1500,
             lifespan: 2500,
-            emitZone: {
+            // @ts-expect-error for some reason the types are wrong
+            emitZone: ({
                 type: 'random',
+                // @ts-expect-error for some reason Vector2Like exists
                 source: itemImg.getBounds()
-            },
+            } satisfies Phaser.Types.GameObjects.Particles.ParticleEmitterRandomZoneConfig),
 
             scale: 0.5,
             speed: { min: 10, max: 30 },

@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 
 export default abstract class Progresser extends Phaser.Scene {
     abstract setupNextLoader(): void;

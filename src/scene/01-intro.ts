@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 
 import Progresser from "../progresser.ts";
 

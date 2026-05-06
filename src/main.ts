@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 
 import IntroScene from "./scene/01-intro.ts";
 
@@ -125,13 +125,13 @@ class SceneModuleFile extends Phaser.Loader.File {
     makeImport: () => Promise<{ default: typeof Phaser.Scene }>
 
     constructor(loader: Phaser.Loader.LoaderPlugin, key: string, makeImport: () => Promise<{ default: typeof Phaser.Scene }>) {
-        super(loader, { type: 'sceneModule', key: key, url: '' });
+        super(loader, { type: 'sceneModule', key: key, url: '', cache: false });
 
         this.makeImport = makeImport;
     }
 
     load() {
-        if(this.state == Phaser.Loader.FILE_POPULATED) {
+        if(this.state == Phaser.Loader.FILE_POPULATED || this.loader.scene.scene.get(this.key) !== null) {
             this.loader.nextFile(this, true)
         } else {
             let importScript: Promise<{ default: typeof Phaser.Scene }> =
@@ -140,7 +140,10 @@ class SceneModuleFile extends Phaser.Loader.File {
             importScript.then(module => {
                 this.loader.scene.scene.add(this.key, module.default)
                 this.onLoad()
-            }).catch(() => this.onError())
+            }).catch(e => {
+                console.error(e)
+                this.onError()
+            })
         }
     }
 
@@ -149,6 +152,7 @@ class SceneModuleFile extends Phaser.Loader.File {
     }
 
     onError() {
+        console.log("nay")
         this.loader.nextFile(this, false)
     }
 }
@@ -173,7 +177,7 @@ class TtfFile extends Phaser.Loader.File {
     fontObject: FontFace | undefined
 
     constructor(loader: Phaser.Loader.LoaderPlugin, family: string, url: string) {
-        super(loader, { type: 'ttf', key: family, url: '' });
+        super(loader, { type: 'ttf', key: family, url: '', cache: false });
         this.fontFamily = family;
         this.ttfUrl = url;
     }

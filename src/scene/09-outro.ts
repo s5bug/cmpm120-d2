@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 import debugCode from "../debug-code.ts";
 
 export default class OutroScene extends Phaser.Scene {

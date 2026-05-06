@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 import ItemSprite from "./item-sprite.ts";
 import Progresser from "./progresser.ts";
 import PathGraph from "./path-graph.ts";
@@ -9,6 +9,22 @@ export type Paths =  {
     paths: Record<string, [string, string]>,
 }
 
+/**
+ * A tiny framework dedicated to tiny adventure games.
+ *
+ * `AdventureScene` is a Phaser scene that provides:
+ *   - an inventory of named string items carried between scenes,
+ *   - a transient message box for flavor text,
+ *   - faded transitions between scenes,
+ *   - a consistent UI layout with fullscreen support.
+ *
+ * Subclass it to build one
+ * location of your adventure. Call the helper methods ({@link AdventureScene#showMessage},
+ * {@link AdventureScene#gainItem}, {@link AdventureScene#gotoScene}, etc.) from
+ * your interactive objects.
+ *
+ * @extends {Phaser.Scene}
+ */
 export default abstract class AdventureScene extends Progresser {
     name: string
     subtitle: string | undefined
@@ -23,10 +39,20 @@ export default abstract class AdventureScene extends Progresser {
     inventoryBanner!: Phaser.GameObjects.Text
     inventoryItems!: ItemSprite[]
 
-    init(data: { inventory?: string[] }) {
+    /**
+     * Phaser lifecycle: receives data passed by `scene.start(key, data)`.
+     * We use this to thread the inventory through scene transitions.
+     */
+    init(data: { inventory?: string[] }): void {
         this.inventory = data.inventory || []
     }
 
+    /**
+     * @param config Passthrough for Phaser's scene config
+     * @param name A human-readable name shown in the UI (e.g. `"The Tunnel"`).
+     * @param subtitle A subtitle shown in the UI (e.g. `"of Doom"`).
+     * @param paths Navigation paths for left-clicking
+     */
     protected constructor(config: Phaser.Types.Scenes.SettingsConfig, name: string, subtitle?: string, paths?: Paths) {
         super(config)
         this.name = name
@@ -55,7 +81,10 @@ export default abstract class AdventureScene extends Progresser {
 
     abstract get story(): AdventureStory<this>
 
-    create() {
+    /**
+     * Phaser lifecycle: called once when the scene starts.
+     */
+    create(): void {
         super.create()
 
         this.transitionDuration = 1000;
@@ -130,7 +159,11 @@ export default abstract class AdventureScene extends Progresser {
     }
 
     private messageTween: Phaser.Tweens.Tween | undefined
-    showMessage(message: string, fadeDelay: number = 0, color?: string) {
+    /**
+     * Briefly flash a message in the UI message box. The message fades out
+     * over a few seconds.
+     */
+    showMessage(message: string, fadeDelay: number = 0, color?: string): void {
         if(color) this.messageBox.setColor(color);
         else this.messageBox.setColor('#eea');
         this.messageBox.setText(message);
@@ -145,7 +178,12 @@ export default abstract class AdventureScene extends Progresser {
         });
     }
 
-    updateInventory() {
+    /**
+     * Re-render the inventory panel. Called automatically by
+     * {@link AdventureScene#gainItem} and {@link AdventureScene#loseItem};
+     * you generally do not need to call this yourself.
+     */
+    updateInventory(): void {
         if (this.inventory.length > 0) {
             this.tweens.add({
                 targets: this.inventoryBanner,
@@ -183,11 +221,20 @@ export default abstract class AdventureScene extends Progresser {
         });
     }
 
-    hasItem(item: string) {
+    /**
+     * Test whether the player is currently carrying an item.
+     */
+    hasItem(item: string): boolean {
         return this.inventory.includes(item);
     }
 
-    gainItem(itemName: string) {
+    /**
+     * Add an item to the player's inventory (no-op with a console warning
+     * if the item is already held). The inventory panel animates the new entry in.
+     *
+     * @param itemName Item name. Short and consistent works best (e.g. `"key"`, not `"a shiny key"`).
+     */
+    gainItem(itemName: string): void {
         if (this.inventory.includes(itemName)) {
             console.warn('gaining item already held:', itemName);
             return;
@@ -207,7 +254,13 @@ export default abstract class AdventureScene extends Progresser {
         }
     }
 
-    loseItem(itemName: string) {
+    /**
+     * Remove an item from the player's inventory (no-op with a console warning
+     * if the item is not held). The inventory panel animates the entry out.
+     *
+     * @param itemName Item name. Must match the name passed to {@link AdventureScene#gainItem}.
+     */
+    loseItem(itemName: string): void {
         if (!this.inventory.includes(itemName)) {
             console.warn('losing item not held:', itemName);
             return;
@@ -236,7 +289,13 @@ export default abstract class AdventureScene extends Progresser {
         this.adventureState.setup(this)
     }
 
-    gotoScene(key: string, data?: object | undefined, fast?: boolean) {
+    /**
+     * Fade out the camera and transition to another scene by key, carrying
+     * the current inventory with us.
+     *
+     * @param key The Phaser scene key of the destination scene.
+     */
+    gotoScene(key: string, data?: object | undefined, fast?: boolean): void {
         super.gotoScene(key, { inventory: this.inventory, ...data }, fast)
     }
 
@@ -256,7 +315,8 @@ export default abstract class AdventureScene extends Progresser {
 
     pathfind(thing: Phaser.GameObjects.Components.Transform, to: Phaser.Types.Math.Vector2Like, speed: number): Phaser.Tweens.TweenChain | undefined {
         let closestPoint = (a: Phaser.Geom.Line, c: Phaser.Types.Math.Vector2Like): Phaser.Math.Vector2 => {
-            let onInfinite = Phaser.Geom.Line.GetNearestPoint(a, c)
+            const cAsVector2 = new Phaser.Math.Vector2(c)
+            let onInfinite = Phaser.Geom.Line.GetNearestPoint(a, cAsVector2)
             let length = Phaser.Geom.Line.Length(a)
 
             let distanceA = a.getPointA().distance(onInfinite)

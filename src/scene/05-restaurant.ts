@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 
 import debugCode from "../debug-code.ts";
 import FishgirlScene from "../fishgirl-scene.ts";

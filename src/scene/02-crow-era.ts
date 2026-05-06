@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 
 import { Paths } from "../adventure.ts";
 import ItemSprite from "../item-sprite.ts";

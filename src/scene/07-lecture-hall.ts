@@ -1,4 +1,4 @@
-import 'phaser';
+import * as Phaser from 'phaser';
 
 import debugCode from "../debug-code.ts";
 import {AdventureStory} from "../adventure-story.ts";

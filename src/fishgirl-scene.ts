@@ -1,3 +1,5 @@
+import * as Phaser from 'phaser';
+
 import AdventureScene, {Paths} from "./adventure.ts";
 import ItemSprite from "./item-sprite.ts";
 
